@@ -375,7 +375,7 @@ std::vector<unsigned> find_intersection_ids_from_street_names(std::string street
                                                               std::string street_name2){
     std::vector<unsigned> interList;
     
-    
+    // it looks like we have a probelm here
     vector<unsigned> find_all_street_intersections(unsigned street_id)
     
     
