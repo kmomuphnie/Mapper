@@ -50,13 +50,7 @@ int main(int argc, char** argv) {
         std::cerr << "  If no map_file_path is provided a default map is loaded.\n";
         return BAD_ARGUMENTS_EXIT_CODE;
     }
-
-    
-   
-    
-    
-    
-    
+  
     //Load the map and related data structures
     bool load_success = load_map(map_path);
     if(!load_success) {
@@ -67,21 +61,12 @@ int main(int argc, char** argv) {
     std::cout << "Successfully loaded map '" << map_path << endl;
 
     //You can now do something with the map data
-
-
-        string test1= getStreetName(1);
-    cout << "test1    "<< test1<< endl;
     
- std::vector<unsigned> test;
- 
-test =  find_street_ids_from_name(test1);
+    cout<<find_street_segment_length(14)<<endl;
     
-for(std::vector<unsigned> ::iterator it = test.begin(); it != test.end(); ++it){
-    cout << ' ' << *it;
-}
-cout << endl;
+    //below are testing code which should be used  in test main
     
-   
+    
     //Clean-up the map data and related data structures
     close_map(); 
 

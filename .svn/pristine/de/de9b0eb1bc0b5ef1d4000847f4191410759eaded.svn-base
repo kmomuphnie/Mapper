@@ -1,0 +1,197 @@
+/* 
+ * Copyright 2018 University of Toronto
+ *
+ * Permission is hereby granted, to use this software and associated 
+ * documentation files (the "Software") in course work at the University 
+ * of Toronto, or for personal use. Other uses are prohibited, in 
+ * particular the distribution of the Software either publicly or to third 
+ * parties.
+ *
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include "m1.h"
+#include "StreetsDatabaseAPI.h"
+#include <string.h>
+using namespace std;
+        
+        
+bool load_map(std::string map_path) {
+    bool load_successful = false; //Indicates whether the map has loaded successfully
+    
+    if(!loadStreetsDatabaseBIN(map_path)){
+        return false;
+    }
+    
+    
+    //
+    //Load your map related data structures here
+    //
+    
+    
+        load_successful = true; //Make sure this is updated to reflect whether
+                            //loading the map succeeded or failed
+
+    return load_successful;
+}
+
+void close_map() {
+    //Clean-up your map related data structures here  
+    cout << "Closing map" << endl;
+    closeStreetDatabase();
+   
+}
+
+
+
+
+//Returns street id(s) for the given street name
+//If no street with this name exists, returns a 0-length vector.
+
+std::vector<unsigned> find_street_ids_from_name(std::string street_name){
+    std::vector<unsigned> result;
+    
+    string temp;
+    unsigned  totalStreetNum = getNumberOfStreets();
+    
+    StreetIndex i = 0;//0 is <unknown> but cant reach total StreetNum
+    //several cases:
+    //a. no such street.  b. more than one street have the same name
+    for( i = 0; i < totalStreetNum ; i++){
+        temp = getStreetName(i);
+        if(temp == street_name){
+            result.push_back(i);
+//          cout << i << endl;
+        }    
+    }
+    
+
+    
+////below are testing code which should be used  in test main
+//    string test1= getStreetName(14);
+//    cout << "test1   is  "<< test1<< endl;
+//    std::vector<unsigned> test;
+//    test =  find_street_ids_from_name(test1);
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+   
+    return result;
+}
+
+
+
+
+
+//Returns the street segments for the given intersection 
+std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
+    std::vector<unsigned> result;
+    unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
+    for(unsigned i = 0; i < numStreetSegment; i++){
+        result.push_back(getIntersectionStreetSegment(intersection_id, i));
+    }
+    
+    
+//    //below are testing code which should be used  in test main
+//    cout << "This is a test using intersection ID 66" <<endl;
+//    string intersection_name = getIntersectionName(66);
+//    cout << "Intersection name is " << intersection_name << endl;
+//    std::vector<unsigned> test = find_intersection_street_segments(66);
+//    cout << "the following ID are the street segment ID that this intersection connected"<<endl;
+//    
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+//    cout << endl;
+//    
+//    for(int j = 0; j < test.size();j++){
+//        cout << "for Street segment ID " << test[j] << ", it";
+//        StreetSegmentInfo testInfo = getStreetSegmentInfo(test[j]);
+//        cout << " from intersection "<< testInfo.from <<"to intersection " << testInfo.to << endl;
+//    }
+    
+    return result;
+}
+
+//Returns the street names at the given intersection (includes duplicate street 
+//names in returned vector)
+std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
+    std::vector<std::string> test;
+    return test;
+}
+
+//Returns true if you can get from intersection1 to intersection2 using a single 
+//street segment (hint: check for 1-way streets too)
+//corner case: an intersection is considered to be connected to itself
+bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
+    return true;
+}
+
+//Returns all intersections reachable by traveling down one street segment 
+//from given intersection (hint: you can't travel the wrong way on a 1-way street)
+//the returned vector should NOT contain duplicate intersections
+std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
+    std::vector<unsigned> test;
+    return test;
+}
+
+//Returns all street segments for the given street
+std::vector<unsigned> find_street_street_segments(unsigned street_id){
+    std::vector<unsigned> test;
+    return test;
+}
+
+//Returns all intersections along the a given street
+std::vector<unsigned> find_all_street_intersections(unsigned street_id){
+    std::vector<unsigned> test;
+    return test;
+}
+
+//Return all intersection ids for two intersecting streets
+//This function will typically return one intersection id.
+//However street names are not guarenteed to be unique, so more than 1 intersection id
+//may exist
+std::vector<unsigned> find_intersection_ids_from_street_names(std::string street_name1, 
+                                                              std::string street_name2){
+    std::vector<unsigned> test;
+    return test;
+}
+
+//Returns the distance between two coordinates in meters
+double find_distance_between_two_points(LatLon point1, LatLon point2){
+    return 0.0;
+}
+
+//Returns the length of the given street segment in meters
+double find_street_segment_length(unsigned street_segment_id){
+    return 0.0;
+}
+
+//Returns the length of the specified street in meters
+double find_street_length(unsigned street_id){
+    return 0.0;
+}
+
+//Returns the travel time to drive a street segment in seconds 
+//(time = distance/speed_limit)
+double find_street_segment_travel_time(unsigned street_segment_id){
+    return 0.0;
+}
+
+//Returns the nearest point of interest to the given position
+unsigned find_closest_point_of_interest(LatLon my_position){
+    return 1;
+}
+
+//Returns the the nearest intersection to the given position
+unsigned find_closest_intersection(LatLon my_position){
+    return 1;
+}
