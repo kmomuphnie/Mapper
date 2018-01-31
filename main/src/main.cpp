@@ -62,9 +62,81 @@ int main(int argc, char** argv) {
 
     //You can now do something with the map data
     
-    cout<<find_street_segment_length(14)<<endl;
+    
+//    //below are testing code which should be used  in test main
+//    string name= getStreetName(2138);
+//    cout << "street name   is  "<< name << endl;
+//    
+//    std::vector<unsigned> test;
+//    test =  find_street_ids_from_name(name);
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+//    
+//    cout << getStreetName(167) << endl;
+    
     
     //below are testing code which should be used  in test main
+    vector<string> nameList;
+    for(int i =160; i <170;i++){
+        nameList.push_back(getStreetName(i));
+    }
+    cout << "the test name list is the following :" << endl;
+    for(int i =0; i< nameList.size();i++){
+        cout << " with ID "<< i+1 << " name is :  " << nameList[i] << endl; 
+    }
+    cout << endl;
+    
+    vector<unsigned> IDList;
+    cout << "start comparing " << endl;
+    
+    for(unsigned i =0; i< nameList.size();i++){
+        
+        IDList.push_back( find_street_ids_from_name(nameList[i]) );
+        
+    }
+    for(unsigned i= 0; i < nameList.size(); i++){
+        cout << "with name: " << nameList[i] << " ID is "  << endl;
+        
+    }
+ 
+    
+
+    //below are testing code which should be used  in test main
+
+//    std::vector<unsigned> test;
+//    cout << endl;
+//    cout << endl;
+//    test =  find_street_ids_from_name("Airdrie Drive");
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+//     cout << endl;
+//    cout << endl;
+//    
+//    test =  find_street_ids_from_name("Siberry Road");
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+//    cout << endl;
+//    cout << endl;
+//    
+//    vector<unsigned> interList = find_intersection_ids_from_street_names("Airdrie Drive", "Siberry Road");
+//    for(unsigned i = 0 ; i < interList.size(); i++){
+//        cout << "intersection ID is " << interList[i]<< endl;
+//    }
+//    cout << endl;
+   
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     
     
     //Clean-up the map data and related data structures

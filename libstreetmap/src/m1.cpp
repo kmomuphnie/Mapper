@@ -61,15 +61,15 @@ void close_map() {
 std::vector<unsigned> find_street_ids_from_name(std::string street_name){
     std::vector<unsigned> result;
     
-    string temp;
+    
     unsigned  totalStreetNum = getNumberOfStreets();
     
     StreetIndex i = 0;//0 is <unknown> but cant reach total StreetNum
     //several cases:
     //a. no such street.  b. more than one street have the same name
     for( i = 0; i < totalStreetNum ; i++){
-        temp = getStreetName(i);
-        if(temp == street_name){
+        
+        if(getStreetName(i) == street_name){
             result.push_back(i);
 //          cout << i << endl;
         }    
@@ -373,15 +373,40 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 //may exist
 std::vector<unsigned> find_intersection_ids_from_street_names(std::string street_name1, 
                                                               std::string street_name2){
-    std::vector<unsigned> interList;
+    std::vector<unsigned> commonInterList;
     
-    // it looks like we have a probelm here
-    vector<unsigned> find_all_street_intersections(unsigned street_id)
+    //in case there are several street have the same name, 
+    //here we shall first get a street id list by the given name
+    vector<unsigned> street1IDList = find_street_ids_from_name(street_name1);
+    vector<unsigned> street2IDList = find_street_ids_from_name(street_name2);
+    
+    //second we need to merge all the intersections that the streets with the same
+    //name have into one list
+    vector<unsigned> street1InterList;
+    for(unsigned i = 0; i < street1IDList.size(); i++){
+        vector<unsigned> temp = find_all_street_intersections(street1IDList[i]);
+        street1InterList.insert( street1InterList.end(), temp.begin(), temp.end() );
+        //merged into the stem list
+    }
     
     
+    vector<unsigned> street2InterList;
+    for(unsigned i = 0; i < street2IDList.size(); i++){
+        vector<unsigned> temp = find_all_street_intersections(street1IDList[i]);
+        street2InterList.insert( street2InterList.end(), temp.begin(), temp.end() );
+        //merged into the stem list
+    }
+    
+    //find the common element between two merged intersection list
+    sort(street1InterList.begin(), street1InterList.end());
+    sort(street2InterList.begin(), street2InterList.end());
+    
+    std::set_intersection(street1InterList.begin(), street1InterList.end(), 
+                          street2InterList.begin(), street2InterList.end(), 
+                          back_inserter(commonInterList));
     
     
-    return interList;
+    return commonInterList;
 }
 
 //Returns the distance between two coordinates in meters
