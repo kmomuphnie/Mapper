@@ -23,6 +23,8 @@
 #include <StreetsDatabaseAPI.h>
 #include "m1.h"
 #include <vector>
+#include <algorithm>
+#include <math.h>
 
 
 
@@ -63,19 +65,43 @@ int main(int argc, char** argv) {
     //You can now do something with the map data
     
     
-//    //below are testing code which should be used  in test main
-//    string name= getStreetName(2138);
-//    cout << "street name   is  "<< name << endl;
-//    
-//    std::vector<unsigned> test;
-//    test =  find_street_ids_from_name(name);
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
+    //below are testing code which should be used  in test main
+//    vector<unsigned>street1InterList;
+//    vector<unsigned>street2InterList;
+//    vector<unsigned>commonInterList;
+//    for(unsigned i =0 ; i < 10 ;i++){
+//        street1InterList.push_back(i);
+//    }
+//    for(unsigned i =5 ; i < 100 ;i++){
+//        street2InterList.push_back(i);
 //    }
 //    
-//    cout << getStreetName(167) << endl;
+//    
+//    sort(street1InterList.begin(), street1InterList.end());
+//    sort(street2InterList.begin(), street2InterList.end());
+//    
+//    std::set_intersection(street1InterList.begin(), street1InterList.end(), 
+//    street2InterList.begin(), street2InterList.end(), 
+//    back_inserter(commonInterList));
+//    for(unsigned i =0 ; i < commonInterList.size() ;i++){
+//        cout << "common are " << commonInterList[i] << endl;
+//    }
     
-  
+    
+    
+    //below are testing code which should be used  in test main
+    string name= getStreetName(160);
+    cout << "street name   is  "<< name << endl;
+    
+    std::vector<unsigned> test;
+    test =  find_street_ids_from_name(name);
+    for(int i = 0; i < test.size(); i++){
+        cout << " " << test[i] << endl;
+    }
+    
+    cout << getStreetName(1) << endl;
+    
+
     
 //    //below are testing code which should be used  in test main
 //    vector<string> nameList;
@@ -92,15 +118,15 @@ int main(int argc, char** argv) {
 //    cout << "start comparing " << endl;
 //    
 //    for(unsigned i =0; i< nameList.size();i++){
-//        
-//        IDList.push_back( find_street_ids_from_name(nameList[i]) );
+//        vector<unsigned> temp = find_street_ids_from_name(nameList[i]);
+//        IDList.insert( IDList.end(), temp.begin(), temp.end() );
 //        //cant do this because may return more than one value
 //    }
 //    for(unsigned i= 0; i < nameList.size(); i++){
-//        cout << "with name: " << nameList[i] << " ID is "  << endl;
+//        cout << "with name: " << nameList[i] << " ID is " << IDList[i] << endl;
 //        
 //    }
- 
+// 
     
 
     //below are testing code which should be used  in test main
