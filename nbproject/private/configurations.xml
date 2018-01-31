@@ -4,6 +4,10 @@
     <df root="." name="0">
       <df name="build">
         <df name="release">
+          <df name="libstreetmap">
+            <df name="src">
+            </df>
+          </df>
           <df name="main">
             <df name="src">
             </df>

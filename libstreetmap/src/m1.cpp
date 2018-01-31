@@ -71,6 +71,7 @@ std::vector<unsigned> find_street_ids_from_name(std::string street_name){
         
         if(getStreetName(i) == street_name){
             result.push_back(i);
+            return result;
 //          cout << i << endl;
         }    
     }

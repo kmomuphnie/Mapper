@@ -338,7 +338,7 @@ SUITE(street_queries_public_toronto_canada) {
         std::vector<unsigned> actual;
         
         expected = {};
-        actual = find_intersection_ids_from_street_names("Airdrie Drive", "Siberry Road"
+        actual = find_intersection_ids_from_street_names("Airdrie Drive", "Siberry Road");
         std::sort(actual.begin(), actual.end());
         CHECK_EQUAL(expected, actual);
         

@@ -75,30 +75,31 @@ int main(int argc, char** argv) {
 //    
 //    cout << getStreetName(167) << endl;
     
+  
     
-    //below are testing code which should be used  in test main
-    vector<string> nameList;
-    for(int i =160; i <170;i++){
-        nameList.push_back(getStreetName(i));
-    }
-    cout << "the test name list is the following :" << endl;
-    for(int i =0; i< nameList.size();i++){
-        cout << " with ID "<< i+1 << " name is :  " << nameList[i] << endl; 
-    }
-    cout << endl;
-    
-    vector<unsigned> IDList;
-    cout << "start comparing " << endl;
-    
-    for(unsigned i =0; i< nameList.size();i++){
-        
-        IDList.push_back( find_street_ids_from_name(nameList[i]) );
-        
-    }
-    for(unsigned i= 0; i < nameList.size(); i++){
-        cout << "with name: " << nameList[i] << " ID is "  << endl;
-        
-    }
+//    //below are testing code which should be used  in test main
+//    vector<string> nameList;
+//    for(int i =160; i <170;i++){
+//        nameList.push_back(getStreetName(i));
+//    }
+//    cout << "the test name list is the following :" << endl;
+//    for(int i =0; i< nameList.size();i++){
+//        cout << " with ID "<< i+1 << " name is :  " << nameList[i] << endl; 
+//    }
+//    cout << endl;
+//    
+//    vector<unsigned> IDList;
+//    cout << "start comparing " << endl;
+//    
+//    for(unsigned i =0; i< nameList.size();i++){
+//        
+//        IDList.push_back( find_street_ids_from_name(nameList[i]) );
+//        //cant do this because may return more than one value
+//    }
+//    for(unsigned i= 0; i < nameList.size(); i++){
+//        cout << "with name: " << nameList[i] << " ID is "  << endl;
+//        
+//    }
  
     
 
