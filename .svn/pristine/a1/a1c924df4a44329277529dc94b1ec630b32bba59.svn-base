@@ -382,7 +382,7 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 
 
 
-//Return all intersectionaat ids for two intersecting streets
+//Return all intersection ids for two intersecting streets
 //This function will typically return one intersection id.
 //However street names are not guarenteed to be unique, so more than 1 intersection id
 //may exist
@@ -407,7 +407,7 @@ std::vector<unsigned> find_intersection_ids_from_street_names(std::string street
     
     vector<unsigned> street2InterList;
     for(unsigned i = 0; i < street2IDList.size(); i++){
-        vector<unsigned> temp = find_all_street_intersections(street2IDList[i]);
+        vector<unsigned> temp = find_all_street_intersections(street1IDList[i]);
         street2InterList.insert( street2InterList.end(), temp.begin(), temp.end() );
         //merged into the stem list
     }

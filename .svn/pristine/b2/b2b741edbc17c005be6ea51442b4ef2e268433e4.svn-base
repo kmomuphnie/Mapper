@@ -24,10 +24,10 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
-#include "map_data.h"
+
 using namespace std;
         
-map_data const* my_map;        
+        
 bool load_map(std::string map_path) {
     bool load_successful = false; //Indicates whether the map has loaded successfully
     
@@ -40,8 +40,6 @@ bool load_map(std::string map_path) {
     //Load your map related data structures here
     //
     
-    //creating the map globe class in loading map
-    my_map = new map_data;
     
         load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
@@ -51,8 +49,6 @@ bool load_map(std::string map_path) {
 
 void close_map() {
     //Clean-up your map related data structures here  
-    
-    //deleting the map globe class in closing map
     cout << "Closing map" << endl;
     closeStreetDatabase();
    
@@ -65,32 +61,20 @@ void close_map() {
 std::vector<unsigned> find_street_ids_from_name(std::string street_name){
     std::vector<unsigned> result;
     
-    
+    string temp;
     unsigned  totalStreetNum = getNumberOfStreets();
     
     StreetIndex i = 0;//0 is <unknown> but cant reach total StreetNum
     //several cases:
     //a. no such street.  b. more than one street have the same name
     for( i = 0; i < totalStreetNum ; i++){
-        
-        if(getStreetName(i) == street_name){
+        temp = getStreetName(i);
+        if(temp == street_name){
             result.push_back(i);
 //          cout << i << endl;
         }    
     }
     
-//        //below are testing code which should be used  in test main
-//    vector<string> nameList;
-//    for(int i =160; i <170;i++){
-//        nameList.push_back(getStreetName(i));
-//    }
-//    cout << "the test name list is the following :" << endl;
-//    for(int i =0; i< nameList.size();i++){
-//        cout << " with ID "<< i+160 << " name is :  " << nameList[i] << endl; 
-//        cout << " with name '" << nameList[i] << "' ID is "<< i+160 << endl;
-//        cout << endl;
-//    }
-//    cout << endl;
 
     return result;
     
@@ -109,15 +93,15 @@ std::vector<unsigned> find_street_ids_from_name(std::string street_name){
 //Returns the street segments for the given intersection 
 std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
     
-//    std::vector<unsigned> streetSegmentList;
-//    
-//    unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
-//    
-//    for(unsigned i = 0; i < numStreetSegment; i++){
-//        streetSegmentList.push_back(getIntersectionStreetSegment(intersection_id, i));
-//    }
-//    
-    return my_map->get_all_segments_from_intersectionID(intersection_id);
+    std::vector<unsigned> streetSegmentList;
+    
+    unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
+    
+    for(unsigned i = 0; i < numStreetSegment; i++){
+        streetSegmentList.push_back(getIntersectionStreetSegment(intersection_id, i));
+    }
+    
+    return streetSegmentList;
     
 //    //below are testing code which should be used  in test main
 //    cout << "This is a test using intersection ID 66" <<endl;
@@ -363,7 +347,6 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
     
  
     return interList;
-    
 //    //below are testing code which should be used  in test main
 //    string test1= getStreetName(14);
 //    cout << "test1   is  "<< test1<< endl;
@@ -380,48 +363,14 @@ std::vector<unsigned> find_all_street_intersections(unsigned street_id){
 
 }
 
-
-
-//Return all intersectionaat ids for two intersecting streets
+//Return all intersection ids for two intersecting streets
 //This function will typically return one intersection id.
 //However street names are not guarenteed to be unique, so more than 1 intersection id
 //may exist
 std::vector<unsigned> find_intersection_ids_from_street_names(std::string street_name1, 
                                                               std::string street_name2){
-    std::vector<unsigned> commonInterList;
-    
-    //in case there are several street have the same name, 
-    //here we shall first get a street id list by the given name
-    vector<unsigned> street1IDList = find_street_ids_from_name(street_name1);
-    vector<unsigned> street2IDList = find_street_ids_from_name(street_name2);
-    
-    //second we need to merge all the intersections that the streets with the same
-    //name have into one list
-    vector<unsigned> street1InterList;
-    for(unsigned i = 0; i < street1IDList.size(); i++){
-        vector<unsigned> temp = find_all_street_intersections(street1IDList[i]);
-        street1InterList.insert( street1InterList.end(), temp.begin(), temp.end() );
-        //merged into the stem list
-    }
-    
-    
-    vector<unsigned> street2InterList;
-    for(unsigned i = 0; i < street2IDList.size(); i++){
-        vector<unsigned> temp = find_all_street_intersections(street2IDList[i]);
-        street2InterList.insert( street2InterList.end(), temp.begin(), temp.end() );
-        //merged into the stem list
-    }
-    
-    //find the common element between two merged intersection list
-    sort(street1InterList.begin(), street1InterList.end());
-    sort(street2InterList.begin(), street2InterList.end());
-    
-    std::set_intersection(street1InterList.begin(), street1InterList.end(), 
-                          street2InterList.begin(), street2InterList.end(), 
-                          back_inserter(commonInterList));
-    
-    
-    return commonInterList;
+    std::vector<unsigned> test;
+    return test;
 }
 
 //Returns the distance between two coordinates in meters
@@ -504,44 +453,10 @@ double find_street_segment_travel_time(unsigned street_segment_id){
 
 //Returns the nearest point of interest to the given position
 unsigned find_closest_point_of_interest(LatLon my_position){
-    double distance =0.0;
-    unsigned interest_ID=0;
-    bool time =true;
-    unsigned totalSSNum = getNumberOfPointsOfInterest();
-    for(unsigned i = 0; i < totalSSNum; i++){
-        LatLon current = getPointOfInterestPosition(i);
-        double currentDiff = find_distance_between_two_points(my_position,current);
-        if(time){
-            distance = currentDiff;
-            interest_ID= i;
-            time=false;
-        }
-        if(distance>currentDiff){
-            distance=currentDiff;
-            interest_ID = i;
-        }
-    }
-    return interest_ID;
+    return 1;
 }
 
 //Returns the the nearest intersection to the given position
 unsigned find_closest_intersection(LatLon my_position){
-    double distance =0.0;
-    unsigned intersection_ID=0;
-    bool time =true;
-    unsigned totalSSNum = getNumberOfIntersections();
-    for(unsigned i = 0; i < totalSSNum; i++){
-        LatLon current = getIntersectionPosition(i);
-        double currentDiff = find_distance_between_two_points(my_position,current);
-        if(time){
-            distance = currentDiff;
-            intersection_ID= i;
-            time=false;
-        }
-        if(distance>currentDiff){
-            distance=currentDiff;
-            intersection_ID = i;
-        }
-    }
-    return intersection_ID;
+    return 1;
 }

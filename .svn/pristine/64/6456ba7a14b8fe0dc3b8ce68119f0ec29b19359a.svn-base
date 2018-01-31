@@ -148,59 +148,72 @@ int main(int argc, char** argv) {
 //    cout << getStreetName(1) << endl;
     
 
+    
+//    //below are testing code which should be used  in test main
+//    vector<string> nameList;
+//    for(int i =160; i <170;i++){
+//        nameList.push_back(getStreetName(i));
+//    }
+//    cout << "the test name list is the following :" << endl;
+//    for(int i =0; i< nameList.size();i++){
+//        cout << " with ID "<< i+160 << " name is :  " << nameList[i] << endl; 
+//        cout << " with name '" << nameList[i] << "' ID is "<< i+160 << endl;
+//        cout << endl;
+//    }
+//    cout << endl;
+    
+//    vector<unsigned> IDList;
+//    cout << "start comparing " << endl;
+//    
+//    for(unsigned i =0; i< nameList.size();i++){
+//        vector<unsigned> temp = find_street_ids_from_name(nameList[i]);
+//        IDList.insert( IDList.end(), temp.begin(), temp.end() );
+//        //cant do this because may return more than one value
+//    }
+//    for(unsigned i= 0; i < nameList.size(); i++){
+//        cout << "with name: " << nameList[i] << " ID is " << IDList[i] << endl;
+//        
+//    }
+ 
+    
 
+    //below are testing code which should be used  in test main
+
+//    std::vector<unsigned> test;
+//    cout << endl;
+//    cout << endl;
+//    test =  find_street_ids_from_name("Airdrie Drive");
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+//     cout << endl;
+//    cout << endl;
+//    
+//    test =  find_street_ids_from_name("Siberry Road");
+//    for(int i = 0; i < test.size(); i++){
+//        cout << " " << test[i] << endl;
+//    }
+//    cout << endl;
+//    cout << endl;
+//    
+//    vector<unsigned> interList = find_intersection_ids_from_street_names("Airdrie Drive", "Siberry Road");
+//    for(unsigned i = 0 ; i < interList.size(); i++){
+//        cout << "intersection ID is " << interList[i]<< endl;
+//    }
+//    cout << endl;
+   
     
     
-    vector<unsigned> street1IDList = find_street_ids_from_name("Woodside Avenue");
-    vector<unsigned> street2IDList = find_street_ids_from_name("Fairview Avenue");
-    for(int i = 0; i < street1IDList.size(); i++){
-        cout << street1IDList[i] << endl;
-    }
-    cout << endl;
-    for(int i = 0; i < street2IDList.size(); i++){
-        cout << street2IDList[i] << endl;
-    }
     
     
-    cout << "3791 " << getStreetName(3791) << endl; 
-    cout << "9048 " << getStreetName(9048)<<endl;
-    cout << "9690 "  <<getStreetName(9690)<<endl;
-    cout << "17339 " << getStreetName(17339)<<endl;
-    cout << endl;
     
-    cout << endl;
-    vector<string> streetNameList = find_intersection_street_names(15813);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
     
-     cout << endl;
-    streetNameList = find_intersection_street_names(15812);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
     
-    cout << endl;
-    streetNameList = find_intersection_street_names(15807);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
-            
-    cout << endl;
-    streetNameList = find_intersection_street_names(15806);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
-            
-            
+    
+    
+    
+    
+    
     //Clean-up the map data and related data structures
     close_map(); 
 

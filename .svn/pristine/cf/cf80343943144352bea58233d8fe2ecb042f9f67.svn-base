@@ -24,7 +24,6 @@
 #include "m1.h"
 #include <vector>
 #include <algorithm>
-#include <math.h>
 
 
 using namespace std;
@@ -63,9 +62,24 @@ int main(int argc, char** argv) {
 
     //You can now do something with the map data
     
-    unsigned actual = find_closest_intersection(LatLon(43.7193603515625, -79.52051544189453));
-    cout<< actual<< endl;
+    
+    
+    
+     double distance = find_street_length(16);
+     cout<<"The longth of the street is "<<distance<<endl;
      
+     vector<unsigned> SSList = find_street_street_segments(16);
+     double segmentLen = 0.0;
+     for(unsigned i = 0; i <SSList.size(); i++){
+         segmentLen = segmentLen + find_street_segment_length(SSList[i]);
+     }
+     cout << " cuu length is " << segmentLen << endl;
+     
+    for(unsigned i = 0; i <SSList.size(); i++){
+        cout <<"SS ID is "<< SSList[i] << " belongs to Street ID: "<< getStreetSegmentInfo(SSList[i]).streetID ;
+        cout << "which length is "<<endl ;
+        
+     }
         //below are testing code which should be used  in test main
     
 //    cout << "This is a test using intersection ID 7" <<endl;
@@ -112,95 +126,8 @@ int main(int argc, char** argv) {
 //    
 //    
     //below are testing code which should be used  in test main
-//    vector<unsigned>street1InterList;
-//    vector<unsigned>street2InterList;
-//    vector<unsigned>commonInterList;
-//    for(unsigned i =0 ; i < 10 ;i++){
-//        street1InterList.push_back(i);
-//    }
-//    for(unsigned i =5 ; i < 100 ;i++){
-//        street2InterList.push_back(i);
-//    }
-//    
-//    
-//    sort(street1InterList.begin(), street1InterList.end());
-//    sort(street2InterList.begin(), street2InterList.end());
-//    
-//    std::set_intersection(street1InterList.begin(), street1InterList.end(), 
-//    street2InterList.begin(), street2InterList.end(), 
-//    back_inserter(commonInterList));
-//    for(unsigned i =0 ; i < commonInterList.size() ;i++){
-//        cout << "common are " << commonInterList[i] << endl;
-//    }
     
     
-    
-    //below are testing code which should be used  in test main
-//    string name= getStreetName(160);
-//    cout << "street name   is  "<< name << endl;
-//    
-//    std::vector<unsigned> test;
-//    test =  find_street_ids_from_name(name);
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-//    
-//    cout << getStreetName(1) << endl;
-    
-
-
-    
-    
-    vector<unsigned> street1IDList = find_street_ids_from_name("Woodside Avenue");
-    vector<unsigned> street2IDList = find_street_ids_from_name("Fairview Avenue");
-    for(int i = 0; i < street1IDList.size(); i++){
-        cout << street1IDList[i] << endl;
-    }
-    cout << endl;
-    for(int i = 0; i < street2IDList.size(); i++){
-        cout << street2IDList[i] << endl;
-    }
-    
-    
-    cout << "3791 " << getStreetName(3791) << endl; 
-    cout << "9048 " << getStreetName(9048)<<endl;
-    cout << "9690 "  <<getStreetName(9690)<<endl;
-    cout << "17339 " << getStreetName(17339)<<endl;
-    cout << endl;
-    
-    cout << endl;
-    vector<string> streetNameList = find_intersection_street_names(15813);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
-    
-     cout << endl;
-    streetNameList = find_intersection_street_names(15812);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
-    
-    cout << endl;
-    streetNameList = find_intersection_street_names(15807);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
-            
-    cout << endl;
-    streetNameList = find_intersection_street_names(15806);
-    cout << " This is a test for finding street name around an intersection:  " << endl;
-    for(int i = 0; i < streetNameList.size(); i++){
-        cout << streetNameList[i] << endl;
-    }
-    cout << endl;
-            
-            
     //Clean-up the map data and related data structures
     close_map(); 
 
