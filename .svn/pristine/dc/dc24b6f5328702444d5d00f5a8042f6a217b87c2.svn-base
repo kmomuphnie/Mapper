@@ -28,19 +28,7 @@
 #include "map_data.h"
 using namespace std;
         
-map_data const* my_map;  
-
-//vector<unsigned> AREA[50][100];//matrix 50x100, 5000 sub areas. each is a vector contains the ID of points within that area
-//vector<LatLon> interLatLonList;
-//float northBound;
-//float southBound;
-//float westBound;
-//float eastBound;
-//double latDelta;
-//double lonDelta;
-
-
-
+map_data const* my_map;        
 bool load_map(std::string map_path) {
     bool load_successful = false; //Indicates whether the map has loaded successfully
     
@@ -48,51 +36,10 @@ bool load_map(std::string map_path) {
         return false;
     }
     
-  
+    
+    //
     //Load your map related data structures here
-//    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
-//        interLatLonList.push_back(getIntersectionPosition(i));
-//    }
-//    //first is to set up the MBR(minimum Boundary rectange)
-//    //find the boundary values
-//    LatLon initial = getIntersectionPosition(0);
-//    northBound = initial.lat();
-//    southBound = initial.lat();
-//    westBound  = initial.lon();
-//    eastBound  = initial.lon();
-////    float northBound = initial.lat();
-////    float southBound = initial.lat();
-////    float westBound  = initial.lon();
-////    float eastBound  = initial.lon();
-//    for(unsigned i = 1; i < getNumberOfIntersections() ; i++){
-//        LatLon temp = getIntersectionPosition(i);
-//        if (temp.lat() > northBound){
-//            northBound = temp.lat();
-//        }
-//        if (temp.lat() < southBound){
-//            southBound = temp.lat();
-//        }
-//        if (temp.lon() > eastBound){
-//            eastBound = temp.lon();
-//        }
-//        if (temp.lon() < westBound){
-//            westBound = temp.lon();
-//        }
-//    }
-//  
-//    latDelta = (northBound - southBound)/50;
-//    lonDelta = (eastBound - westBound)/100;
-//    //the following is to built up the map. ie, stores point in the area.
-//    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
-//        LatLon temp = getIntersectionPosition(i);
-//        int rowIndex = (temp.lat() - southBound) / latDelta;
-//        int colIndex = (temp.lon() - westBound ) / lonDelta;
-//        AREA[rowIndex][colIndex].push_back(i);//store the ID of intersection into the sub area vector.
-//    }
-    
-    //Load your map related data structures above
-    
-    
+    //
     
     //creating the map globe class in loading map
     my_map = new map_data;
@@ -632,8 +579,8 @@ unsigned find_closest_intersection(LatLon my_position){
     double distance =0.0;
     unsigned intersection_ID=0;
     bool time =true;
-    unsigned totalInterNum = getNumberOfIntersections();
-    for(unsigned i = 0; i < totalInterNum; i++){
+    unsigned totalSSNum = getNumberOfIntersections();
+    for(unsigned i = 0; i < totalSSNum; i++){
         LatLon current = getIntersectionPosition(i);
         double currentDiff = find_distance_between_two_points(my_position,current);
         if(time){
@@ -647,63 +594,4 @@ unsigned find_closest_intersection(LatLon my_position){
         }
     }
     return intersection_ID;
-    
-    
-//    //the following is the advanced search method
-//    //first if my_position is out of MBR, then do the normal way
-//    if((my_position.lat() >= northBound) || 
-//       (my_position.lat() <= southBound) ||
-//       (my_position.lon() >= eastBound ) ||
-//       (my_position.lon() <= westBound )   ){
-//        double distance =0.0;
-//        unsigned intersection_ID=0;
-//        bool time =true;
-//        unsigned totalInterNum = getNumberOfIntersections();
-//        for(unsigned i = 0; i < totalInterNum; i++){
-//            LatLon current = getIntersectionPosition(i);
-//            double currentDiff = find_distance_between_two_points(my_position,current);
-//            if(time){
-//                distance = currentDiff;
-//                intersection_ID= i;
-//                time=false;
-//            }
-//            if(distance>currentDiff){
-//                distance=currentDiff;
-//                intersection_ID = i;
-//            }
-//        }
-//        return intersection_ID;
-//    }
-//    
-//    //then if my_position is within the MBR
-//    int myPositionRowIndex = (my_position.lat() - southBound) / latDelta;
-//    int myPositionColIndex = (my_position.lon() - westBound ) / lonDelta;
-//    //looking around 9 sub areas, get a total list of ID of points with those 9 areas
-//    vector<unsigned> totalIDListOfSurround;
-//    for(int i = myPositionRowIndex - 1; i <= myPositionRowIndex + 1; i++){
-//        for(int j = myPositionColIndex - 1; j <= myPositionColIndex + 1; j++){
-//            vector<unsigned> temp = AREA[i][j];
-//            totalIDListOfSurround.insert( totalIDListOfSurround.end(), temp.begin(), temp.end() );
-//        }
-//    }
-//    
-//    double distance =0.0;
-//    unsigned intersection_ID=0;
-//    bool time = true;
-//    unsigned surroundInterNum = totalIDListOfSurround.size();
-//    for(unsigned i = 0; i < surroundInterNum; i++){
-//        LatLon current = interLatLonList[totalIDListOfSurround[i]];
-//        double currentDiff = find_distance_between_two_points(my_position,current);
-//        if(time){
-//            distance = currentDiff;
-//            intersection_ID = totalIDListOfSurround[i];
-//            time = false;
-//        }
-//        if(currentDiff < distance){
-//            distance = currentDiff;
-//            intersection_ID = totalIDListOfSurround[i];
-//        }
-//    }
-//    
-//    return intersection_ID;
 }

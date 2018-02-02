@@ -26,7 +26,7 @@
 #include <map>
 #include <algorithm>
 #include <math.h>
-
+#include <LatLon.h>
 
 using namespace std;
 //Program exit codes
@@ -62,13 +62,65 @@ int main(int argc, char** argv) {
 
     std::cout << "Successfully loaded map '" << map_path << endl;
 
+    
+    
+    
+    
+    
     //You can now do something with the map data
     
   
      
-
-
-
+    //first is to set up the MBR(minimum Boundary rectange)
+    //find the boundary values
+//    LatLon initial = getIntersectionPosition(0);
+//    float northBound = initial.lat();
+//    float southBound = initial.lat();
+//    float westBound  = initial.lon();
+//    float eastBound  = initial.lon();
+//    for(unsigned i = 1; i < getNumberOfIntersections() ; i++){
+//        LatLon temp = getIntersectionPosition(i);
+//        if (temp.lat() > northBound){
+//            northBound = temp.lat();
+//        }
+//        if (temp.lat() < southBound){
+//            southBound = temp.lat();
+//        }
+//        if (temp.lon() > eastBound){
+//            eastBound = temp.lon();
+//        }
+//        if (temp.lon() < westBound){
+//            westBound = temp.lon();
+//        }
+//    }
+  
+    //vector<LatLon> interLatLonList;
+//    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
+//        interLatLonList.push_back(getIntersectionPosition(i));
+//    }
+    //vector<unsigned> AREA[50][100];//matrix 50x100, 5000 sub areas. each is a vector contains the ID of points within that area
+//    double latDelta = (northBound - southBound)/50;
+//    double lonDelta = (eastBound - westBound)/100;
+//    //the following is to built up the map. ie, stores point in the area.
+//    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
+//        LatLon temp = getIntersectionPosition(i);
+//        int rowIndex = (temp.lat() - southBound) / latDelta;
+//        int colIndex = (temp.lon() - westBound ) / lonDelta;
+//        AREA[rowIndex][colIndex].push_back(i);//store the ID of intersection into the sub area vector.
+//    }
+//    
+//    
+//    cout << "the northBound is : " << northBound << endl;
+//    cout << "the southBound is : " << southBound << endl;
+//    cout << "the eastBound is  : " << eastBound  << endl;
+//    cout << "the westBound is  : " << westBound  << endl;   
+//    cout << "total number of intersections : "<< getNumberOfIntersections() << endl;
+//    cout << "intersection lag and lon example " << getIntersectionPosition(100).lat() << " and " << getIntersectionPosition(100).lon() << endl;
+//    cout << "latDelta is " << latDelta << endl;
+//    cout << "lonDelta is " << lonDelta << endl;
+//    for(int i = 0; i < AREA[28][53].size(); i++){
+//        cout << AREA[28][53][i] << endl;
+//    }
     
     
 
