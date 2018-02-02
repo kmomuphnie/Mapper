@@ -1,0 +1,38 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+#include "map_data.h"
+
+// constructor
+map_data::map_data(){
+    unsigned totalsegmentNum = getNumberOfStreetSegments();
+    unsigned totalstreetNum = getNumberOfStreets();
+    unsigned totalIntersectionsNum = getNumberOfIntersections();
+    
+    intersection_street_segments.resize(totalIntersectionsNum);
+    street_segments.resize(totalstreetNum);
+    for(unsigned intersection = 0; intersection < totalIntersectionsNum;++intersection){
+        for(unsigned i=0; i< getIntersectionStreetSegmentCount(intersection);++i){
+            auto const ss_id = getIntersectionStreetSegment(intersection,i);
+            intersection_street_segments[intersection].push_back(ss_id);
+        }
+    }
+    for(unsigned segmentID=0;segmentID<totalsegmentNum;segmentID++){
+        StreetSegmentInfo temp = getStreetSegmentInfo(segmentID);
+        unsigned tempstreetID = temp.streetID;
+            street_segments[tempstreetID].push_back(segmentID);
+        }
+}
+    
+
+
+std::vector<unsigned>map_data::get_all_segments_from_intersectionID (unsigned inputintersectionID) const{
+    return intersection_street_segments[inputintersectionID];
+}
+
+std::vector<unsigned>map_data::get_all_segments_streetID (unsigned inputstreetID) const{
+    return street_segments[inputstreetID];
+}

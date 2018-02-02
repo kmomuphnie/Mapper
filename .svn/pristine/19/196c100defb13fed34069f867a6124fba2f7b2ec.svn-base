@@ -15,7 +15,6 @@
 #define MAP_DATA_H
 #include <string>
 #include <vector>
-#include <map>
 #include <algorithm>
 #include <math.h>
 #include <iostream>
@@ -24,17 +23,11 @@
 using namespace std;
 class map_data{
     private:
-        unsigned streetnameIDNum=0;
-        std::map<std::string,unsigned> streetnameID;
         std::vector<std::vector<unsigned> > street_segments;
         std::vector<std::vector<unsigned> > intersection_street_segments;
-        std::vector<std::vector<unsigned> > street_intersections;
-        std::vector<std::vector<unsigned> > streetnameID_streetID;
     public:
         std::vector<unsigned> get_all_segments_streetID (unsigned inputstreetID)  const;
         std::vector<unsigned> get_all_segments_from_intersectionID (unsigned inputintersectionID) const;
-        std::vector<unsigned> get_all_intersections_streetID (unsigned inputstreetID)  const;
-        std::vector<unsigned> get_all_streetID_streetString (std::string inputstreetString) const;
         map_data();
 };
 #endif /* MAP_DATA_H */

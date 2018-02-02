@@ -24,7 +24,6 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
-#include <map>
 #include "map_data.h"
 using namespace std;
         
@@ -65,36 +64,36 @@ void close_map() {
 //If no street with this name exists, returns a 0-length vector.
 
 std::vector<unsigned> find_street_ids_from_name(std::string street_name){
-//    std::vector<unsigned> result;
-//    
-//    
-//    unsigned  totalStreetNum = getNumberOfStreets();
-//    
-//    StreetIndex i = 0;//0 is <unknown> but cant reach total StreetNum
-//    //several cases:
-//    //a. no such street.  b. more than one street have the same name
-//    for( i = 0; i < totalStreetNum ; i++){
-//        
-//        if(getStreetName(i) == street_name){
-//            result.push_back(i);
-////          cout << i << endl;
-//        }    
+    std::vector<unsigned> result;
+    
+    
+    unsigned  totalStreetNum = getNumberOfStreets();
+    
+    StreetIndex i = 0;//0 is <unknown> but cant reach total StreetNum
+    //several cases:
+    //a. no such street.  b. more than one street have the same name
+    for( i = 0; i < totalStreetNum ; i++){
+        
+        if(getStreetName(i) == street_name){
+            result.push_back(i);
+//          cout << i << endl;
+        }    
+    }
+    
+//        //below are testing code which should be used  in test main
+//    vector<string> nameList;
+//    for(int i =160; i <170;i++){
+//        nameList.push_back(getStreetName(i));
 //    }
-//    
-////        //below are testing code which should be used  in test main
-////    vector<string> nameList;
-////    for(int i =160; i <170;i++){
-////        nameList.push_back(getStreetName(i));
-////    }
-////    cout << "the test name list is the following :" << endl;
-////    for(int i =0; i< nameList.size();i++){
-////        cout << " with ID "<< i+160 << " name is :  " << nameList[i] << endl; 
-////        cout << " with name '" << nameList[i] << "' ID is "<< i+160 << endl;
-////        cout << endl;
-////    }
-////    cout << endl;
+//    cout << "the test name list is the following :" << endl;
+//    for(int i =0; i< nameList.size();i++){
+//        cout << " with ID "<< i+160 << " name is :  " << nameList[i] << endl; 
+//        cout << " with name '" << nameList[i] << "' ID is "<< i+160 << endl;
+//        cout << endl;
+//    }
+//    cout << endl;
 
-    return my_map->get_all_streetID_streetString(street_name);
+    return result;
     
 ////below are testing code which should be used  in test main
 //    string test1= getStreetName(14);
@@ -117,7 +116,8 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 //    
 //    for(unsigned i = 0; i < numStreetSegment; i++){
 //        streetSegmentList.push_back(getIntersectionStreetSegment(intersection_id, i));
-//    }    
+//    }
+//    
     return my_map->get_all_segments_from_intersectionID(intersection_id);
     
 //    //below are testing code which should be used  in test main
@@ -348,20 +348,22 @@ std::vector<unsigned> find_street_street_segments(unsigned street_id){
 
 //Returns all intersections along the a given street
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
-//    std::vector<unsigned> interList;
-//    
-//    //this is the list of all the street segment of a given street
-//    vector<unsigned> SSList = find_street_street_segments(street_id);
-//    for(unsigned i = 0; i< SSList.size(); i++){
-//        StreetSegmentInfo temp = getStreetSegmentInfo(SSList[i]);
-//        interList.push_back(temp.from);
-//        interList.push_back(temp.to);     
-//    }
-//    
-//    //sort the interList first then erase the duplicate
-//    sort(  interList.begin(), interList.end()  );
-//    interList.erase(  unique( interList.begin(), interList.end() ), interList.end()  );
-    return my_map->get_all_intersections_streetID(street_id);
+    std::vector<unsigned> interList;
+    
+    //this is the list of all the street segment of a given street
+    vector<unsigned> SSList = find_street_street_segments(street_id);
+    for(unsigned i = 0; i< SSList.size(); i++){
+        StreetSegmentInfo temp = getStreetSegmentInfo(SSList[i]);
+        interList.push_back(temp.from);
+        interList.push_back(temp.to);     
+    }
+    
+    //sort the interList first then erase the duplicate
+    sort(  interList.begin(), interList.end()  );
+    interList.erase(  unique( interList.begin(), interList.end() ), interList.end()  );
+    
+ 
+    return interList;
     
 //    //below are testing code which should be used  in test main
 //    string test1= getStreetName(14);
@@ -421,55 +423,6 @@ std::vector<unsigned> find_intersection_ids_from_street_names(std::string street
     
     
     return commonInterList;
-//    //below are testing code which should be used  in test main
-//    vector<unsigned> street1IDList = find_street_ids_from_name("Woodside Avenue");
-//    vector<unsigned> street2IDList = find_street_ids_from_name("Fairview Avenue");
-//    for(int i = 0; i < street1IDList.size(); i++){
-//        cout << street1IDList[i] << endl;
-//    }
-//    cout << endl;
-//    for(int i = 0; i < street2IDList.size(); i++){
-//        cout << street2IDList[i] << endl;
-//    }
-//    
-//    
-//    cout << "3791 " << getStreetName(3791) << endl; 
-//    cout << "9048 " << getStreetName(9048)<<endl;
-//    cout << "9690 "  <<getStreetName(9690)<<endl;
-//    cout << "17339 " << getStreetName(17339)<<endl;
-//    cout << endl;
-//    
-//    cout << endl;
-//    vector<string> streetNameList = find_intersection_street_names(15813);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-//    
-//     cout << endl;
-//    streetNameList = find_intersection_street_names(15812);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-//    
-//    cout << endl;
-//    streetNameList = find_intersection_street_names(15807);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-//            
-//    cout << endl;
-//    streetNameList = find_intersection_street_names(15806);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
 }
 
 //Returns the distance between two coordinates in meters
