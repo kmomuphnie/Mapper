@@ -15,12 +15,17 @@ map_data::map_data(){
     intersection_street_segments.resize(totalIntersectionsNum);
     street_segments.resize(totalstreetNum);
     street_intersections.resize(totalstreetNum);
+    streetID_streetlength.insert(streetID_streetlength.begin(),totalstreetNum,0.0);
+    
     for(unsigned intersection = 0; intersection < totalIntersectionsNum;++intersection){
         for(unsigned i=0; i< getIntersectionStreetSegmentCount(intersection);++i){
             auto const ss_id = getIntersectionStreetSegment(intersection,i);
             intersection_street_segments[intersection].push_back(ss_id);
         }
     }
+    
+    
+    
     for(unsigned segmentID=0;segmentID<totalsegmentNum;segmentID++){
         StreetSegmentInfo temp = getStreetSegmentInfo(segmentID);
         unsigned tempstreetID = temp.streetID;
@@ -49,28 +54,33 @@ map_data::map_data(){
             }
             segmentID_segmentlength.push_back(distance);
             segmentID_traveltime.push_back(distance/speedLimit);
+            streetID_streetlength[tempstreetID]+=distance;
         }
-    for(unsigned streetID=0;streetID<totalstreetNum;streetID++){
-        sort(  street_intersections[streetID].begin(), street_intersections[streetID].end()  );
-    street_intersections[streetID].erase(  unique( street_intersections[streetID].begin(), street_intersections[streetID].end() ), street_intersections[streetID].end()  );
-    }
     
     for(unsigned streetID=0;streetID<totalstreetNum;++streetID){
+        //sort the street intersections first 
+        sort(  street_intersections[streetID].begin(), street_intersections[streetID].end()  );
+        street_intersections[streetID].erase(  unique( street_intersections[streetID].begin(), street_intersections[streetID].end() ), street_intersections[streetID].end()  );
+//later will be used//        
+//        //set all streetnameID map
+//        std::string tempstreetname = getStreetName(streetID);
+//        auto it = streetnameID.find(tempstreetname);
+//        //if find
+//        if(it!=streetnameID.end()){
+//            streetnameID_streetID[it->second].push_back(streetID);
+//        }
+//        //if did not find
+//        else {
+//            streetnameID[tempstreetname]=streetnameIDNum;
+//            streetnameID_streetID.push_back(std::vector<unsigned>());
+//            streetnameID_streetID[streetnameIDNum].push_back(streetID);
+//            streetnameIDNum++;
+//        }
+//        
+        //set streetstring_streetIDs unordermap
         std::string tempstreetname = getStreetName(streetID);
-        auto it = streetnameID.find(tempstreetname);
-        //if find
-        if(it!=streetnameID.end()){
-            streetnameID_streetID[it->second].push_back(streetID);
-        }
-        //if did not find
-        else {
-            streetnameID[tempstreetname]=streetnameIDNum;
-            streetnameID_streetID.push_back(std::vector<unsigned>());
-            streetnameID_streetID[streetnameIDNum].push_back(streetID);
-            streetnameIDNum++;
-        }
+        streetString_streetIDs[tempstreetname].push_back(streetID);
     }
-    
 }
     
 
@@ -88,7 +98,8 @@ std::vector<unsigned>map_data::get_all_intersections_streetID (unsigned inputstr
 }
 
 std::vector<unsigned>map_data::get_all_streetID_streetString (std::string inputstreetString) const{
-    return streetnameID_streetID[streetnameID.at(inputstreetString)];
+    //later would be used//return streetnameID_streetID[streetnameID.at(inputstreetString)];
+    return streetString_streetIDs.at(inputstreetString);
 }
 
 double map_data::get_segmentlength_segmentID(unsigned inputsegmentID) const{
@@ -97,4 +108,8 @@ double map_data::get_segmentlength_segmentID(unsigned inputsegmentID) const{
 
 double map_data::get_traveltime_segmentID(unsigned inputsegmentID) const{
     return segmentID_traveltime[inputsegmentID];
+}
+
+double map_data::get_streetlength_streetID(unsigned inputstreetID) const{
+    return streetID_streetlength[inputstreetID];
 }

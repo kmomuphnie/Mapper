@@ -16,6 +16,8 @@
       </df>
       <df name="libstreetmap">
         <df name="src">
+          <in>area.cpp</in>
+          <in>area.h</in>
           <in>m1.cpp</in>
           <in>map_data.cpp</in>
           <in>map_data.h</in>

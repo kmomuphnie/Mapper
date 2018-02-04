@@ -4,6 +4,8 @@
     <df root="." name="0">
       <df name="libstreetmap">
         <df name="src">
+          <in>area.cpp</in>
+          <in>area.h</in>
           <in>m1.cpp</in>
           <in>map_data.cpp</in>
         </df>
@@ -81,6 +83,10 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="11">
         <ccTool flags="0">
         </ccTool>
@@ -132,6 +138,10 @@
           </preprocessorList>
         </ccTool>
       </folder>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
@@ -175,6 +185,10 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
@@ -236,6 +250,10 @@
           </incDir>
         </ccTool>
       </folder>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="11">
         <ccTool flags="1">
         </ccTool>
@@ -386,6 +404,10 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="11">
         <ccTool flags="0">
         </ccTool>
@@ -548,6 +570,10 @@
           </incDir>
         </ccTool>
       </folder>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
@@ -588,6 +614,10 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="libstreetmap/src/area.cpp" ex="false" tool="1" flavor2="0">
+      </item>
+      <item path="libstreetmap/src/area.h" ex="false" tool="3" flavor2="0">
+      </item>
       <item path="libstreetmap/src/m1.cpp" ex="false" tool="1" flavor2="8">
         <ccTool flags="0">
         </ccTool>
