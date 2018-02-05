@@ -1,0 +1,264 @@
+/* 
+ * Copyright 2018 University of Toronto
+ *
+ * Permission is hereby granted, to use this software and associated 
+ * documentation files (the "Software") in course work at the University 
+ * of Toronto, or for personal use. Other uses are prohibited, in 
+ * particular the distribution of the Software either publicly or to third 
+ * parties.
+ *
+ * The above copyright notice and this permission notice shall be included in 
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE 
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER 
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
+#include "m1.h"
+#include "StreetsDatabaseAPI.h"
+#include <string.h>
+#include <vector>
+#include <algorithm>
+#include <math.h>
+#include <map>
+#include "map_data.h"
+#include <list> 
+
+using namespace std;
+        
+map_data const* my_map;
+
+bool load_map(std::string map_path) {
+    bool load_successful = false; 
+    //Indicates whether the map has loaded successfully
+    
+    if(!loadStreetsDatabaseBIN(map_path)){
+        return false;
+    }
+    //Load your map related data structures below   
+    
+    //creating the map globe class in loading map
+    my_map = new map_data;
+        load_successful = true; //Make sure this is updated to reflect whether
+                            //loading the map succeeded or failed
+    return load_successful;
+}
+
+void close_map() {
+    //Clean-up your map related data structures here  
+//    //delete area class here
+//    delete my_area;   
+    //deleting the map globe class in closing map
+    delete my_map;
+
+    cout << "Closing map" << endl;
+    closeStreetDatabase();
+}
+
+
+//Returns street id(s) for the given street name
+//If no street with this name exists, returns a 0-length vector.
+std::vector<unsigned> find_street_ids_from_name(std::string street_name){
+    return my_map->get_all_streetID_streetString(street_name);
+}
+
+//Returns the street segments for the given intersection 
+std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){   
+    return my_map->get_all_segments_from_intersectionID(intersection_id);
+}
+
+
+
+
+//Returns the street names at the given intersection (includes duplicate street 
+//names in returned vector)
+std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
+    vector<string> streetNameList;
+    
+    vector<unsigned> streetSegmentList;
+    unsigned tempsegmentID;
+    StreetSegmentInfo temp;
+    unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
+    for(unsigned i = 0; i < numStreetSegment; i++){
+        tempsegmentID = getIntersectionStreetSegment(intersection_id, i);
+        temp = getStreetSegmentInfo(tempsegmentID);
+        streetNameList.push_back(getStreetName(temp.streetID));
+    }
+  
+    return streetNameList;
+}
+
+
+//Returns true if you can get from intersection1 to intersection2 using a single 
+//street segment (hint: check for 1-way streets too)
+//corner case: an intersection is considered to be connected to itself
+bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2){
+    
+    if(intersection_id1 == intersection_id2){
+        //the same intersection
+        return true;
+    }
+    
+    vector<unsigned>SSIDList1 =  find_intersection_street_segments(intersection_id1);
+    vector<unsigned>SSIDList2 =  find_intersection_street_segments(intersection_id2);
+    
+    
+    //comparing two vectors to find common element
+    for(unsigned i = 0; i < SSIDList1.size(); i++){
+        for(unsigned j = 0; j < SSIDList2.size();j++){
+            if(SSIDList1[i] == SSIDList2[j]){
+                StreetSegmentInfo temp = getStreetSegmentInfo(SSIDList1[i]);
+                //check the oneway situation
+                if(temp.oneWay){
+                    if((temp.from == intersection_id1) && (temp.to == intersection_id2)){
+                        return true;
+                    }
+                }else{
+                    return true;
+                }
+
+            }
+        
+        
+        }    
+    }   
+    return false;
+}
+
+
+
+
+
+//Returns all intersections reachable by traveling down one street segment 
+//from given intersection (hint: you can't travel the wrong way on a 1-way street)
+//the returned vector should NOT contain duplicate intersections
+std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
+    std::vector<unsigned> adjIDList;
+    
+    vector<unsigned>SSIDList =  find_intersection_street_segments(intersection_id);
+    for(unsigned i = 0; i < SSIDList.size(); i++){
+        StreetSegmentInfo temp = getStreetSegmentInfo(SSIDList[i]);
+        
+        if(temp.oneWay){//if is one way street segment
+            if(temp.from == intersection_id){//put the destination into the list
+                adjIDList.push_back(temp.to);
+            }
+        }else{//if is not one way
+            if(temp.from == intersection_id){//put the destination into the list
+                adjIDList.push_back(temp.to);
+            }
+            if(temp.to == intersection_id){//put the destination into the list
+                adjIDList.push_back(temp.from);
+            }
+        }
+    }
+    
+    //sort the adjIDList first then erase the duplicate
+    
+    sort(adjIDList.begin(), adjIDList.end()  );
+    adjIDList.erase(  unique( adjIDList.begin(), adjIDList.end() ), adjIDList.end()  );
+    
+    
+    return adjIDList;  
+}
+
+
+
+//Returns all street segments for the given street
+std::vector<unsigned> find_street_street_segments(unsigned street_id){
+    std::vector<unsigned> SSList;
+    return my_map->get_all_segments_streetID(street_id);  
+}
+
+
+//Returns all intersections along the a given street
+std::vector<unsigned> find_all_street_intersections(unsigned street_id){
+    return my_map->get_all_intersections_streetID(street_id);
+}
+
+
+//Return all intersectionaat ids for two intersecting streets
+//This function will typically return one intersection id.
+//However street names are not guarenteed to be unique, so more than 1 intersection id
+//may exist
+std::vector<unsigned> find_intersection_ids_from_street_names(std::string street_name1, 
+                                                              std::string street_name2){
+    std::vector<unsigned> commonInterList;
+    
+    //in case there are several street have the same name, 
+    //here we shall first get a street id list by the given name
+    vector<unsigned> street1IDList = find_street_ids_from_name(street_name1);
+    vector<unsigned> street2IDList = find_street_ids_from_name(street_name2);
+    
+    //second we need to merge all the intersections that the streets with the same
+    //name have into one list
+    vector<unsigned> street1InterList;
+    for(unsigned i = 0; i < street1IDList.size(); i++){
+        vector<unsigned> temp = find_all_street_intersections(street1IDList[i]);
+        street1InterList.insert( street1InterList.end(), temp.begin(), temp.end() );
+        //merged into the stem list
+    }
+    
+    
+    vector<unsigned> street2InterList;
+    for(unsigned i = 0; i < street2IDList.size(); i++){
+        vector<unsigned> temp = find_all_street_intersections(street2IDList[i]);
+        street2InterList.insert( street2InterList.end(), temp.begin(), temp.end() );
+        //merged into the stem list
+    }
+    
+    //find the common element between two merged intersection list
+    sort(street1InterList.begin(), street1InterList.end());
+    sort(street2InterList.begin(), street2InterList.end());
+    
+    std::set_intersection(street1InterList.begin(), street1InterList.end(), 
+                          street2InterList.begin(), street2InterList.end(), 
+                          back_inserter(commonInterList));
+    
+    
+    return commonInterList;
+}
+
+//Returns the distance between two coordinates in meters
+double find_distance_between_two_points(LatLon point1, LatLon point2){
+    double distance=0.0;
+    double avgLat=(point1.lat()+point2.lat())/2*DEG_TO_RAD;
+    double x1=point1.lon()*DEG_TO_RAD*cos(avgLat),
+            y1=point1.lat()*DEG_TO_RAD;
+    double x2=point2.lon()*DEG_TO_RAD*cos(avgLat),
+            y2=point2.lat()*DEG_TO_RAD;
+    double diffx=x1-x2;
+    double diffy=y1-y2;
+    distance=sqrt(diffx*diffx+diffy*diffy)*EARTH_RADIUS_IN_METERS;
+    return distance;
+}
+
+//Returns the length of the given street segment in meters
+double find_street_segment_length(unsigned street_segment_id){     
+    return my_map->get_segmentlength_segmentID(street_segment_id);
+}
+
+//Returns the length of the specified street in meters
+double find_street_length(unsigned street_id){
+    return my_map->get_streetlength_streetID(street_id);
+}
+
+//Returns the travel time to drive a street segment in seconds 
+//(time = distance/speed_limit)
+double find_street_segment_travel_time(unsigned street_segment_id){
+    return my_map->get_traveltime_segmentID(street_segment_id);
+}
+
+//Returns the nearest point of interest to the given position
+unsigned find_closest_point_of_interest(LatLon my_position){
+    return my_map->closest_interest_point(my_position);
+}
+
+//Returns the the nearest intersection to the given position
+unsigned find_closest_intersection(LatLon my_position){
+    return my_map->closest_intersection_point(my_position);
+}    

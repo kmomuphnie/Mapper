@@ -26,31 +26,11 @@
 #include <math.h>
 #include <map>
 #include "map_data.h"
-#include "area.h"
 #include <list> 
-
-
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/geometries/box.hpp>
-
-#include <boost/geometry/index/rtree.hpp>
-
-#include <boost/foreach.hpp>
-
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
 
 using namespace std;
         
 map_data const* my_map;
-
-typedef bg::model::point<float, 2, bg::cs::cartesian> point;
-
-typedef std::pair<point, unsigned> value;
-
-bgi::rtree< value, bgi::rstar<8> > rt;
-bgi::rtree< value, bgi::rstar<8> > rtForPOI;
 
 bool load_map(std::string map_path) {
     bool load_successful = false; 
@@ -59,214 +39,36 @@ bool load_map(std::string map_path) {
     if(!loadStreetsDatabaseBIN(map_path)){
         return false;
     }
-    
-    //Load your map related data structures below
-    
-    
-    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
-        LatLon temp = getIntersectionPosition(i);
-        point tempPos = point(temp.lon(), temp.lat());
-        rt.insert(std::make_pair(tempPos, i));
-    }
-    
-    for(unsigned i = 0; i < getNumberOfPointsOfInterest(); i++){
-        LatLon temp = getPointOfInterestPosition(i);
-        point tempPOI = point(temp.lon(), temp.lat());
-        rtForPOI.insert(std::make_pair(tempPOI, i));
-    }
-    
-    
-    
-    
-    
-    
-    
-    
-    //area* my_area;
-//
-//struct Area {
-//  vector<unsigned> AREA[50][100];
-//
-//        //matrix 50x100, 5000 sub areas. each is a vector contains the ID of points within that area
-//        vector<LatLon> interLatLonList;
-//        double northBound;
-//        double southBound;
-//        double westBound;
-//        double eastBound;
-//    double latDelta;
-//    double lonDelta;
-//} myArea;
-    
-    
-//    //Load map related data structures here
-//    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
-//        myArea.interLatLonList.push_back(getIntersectionPosition(i));
-//    }
-//    //first is to set up the MBR(minimum Boundary rectangle)
-//    //find the boundary values
-//    LatLon initial = getIntersectionPosition(0);
-//    myArea.northBound = initial.lat();
-//    myArea.southBound = initial.lat();
-//    myArea.westBound  = initial.lon();
-//    myArea.eastBound  = initial.lon();
-//    
-//    for(unsigned i = 1; i < myArea.interLatLonList.size() ; i++){
-//        LatLon temp = myArea.interLatLonList[i];
-//        if (temp.lat() > myArea.northBound){
-//            myArea.northBound = temp.lat();
-//        }
-//        if (temp.lat() < myArea.southBound){
-//            myArea.southBound = temp.lat();
-//        }
-//        if (temp.lon() > myArea.eastBound){
-//            myArea.eastBound = temp.lon();
-//        }
-//        if (temp.lon() < myArea.westBound){
-//            myArea.westBound = temp.lon();
-//        }
-//    }
-//  
-//    myArea.latDelta = (myArea.northBound - myArea.southBound)/50;
-//    myArea.lonDelta = (myArea.eastBound - myArea.westBound)/100;
-//    //the following is to built up the map. ie, stores point in the area.
-//    
-//    
-//    for(unsigned i = 0; i < myArea.interLatLonList.size(); i++){
-//        LatLon temp = myArea.interLatLonList[i];
-//        int rowIndex = (temp.lat() - myArea.southBound) / myArea.latDelta;
-//        int colIndex = (temp.lon() - myArea.westBound ) / myArea.lonDelta;
-//        
-//        myArea.AREA[rowIndex][colIndex].push_back(i);
-//    }
-//    cout << "the northBound is : " << myArea.northBound << endl;
-//    cout << "the southBound is : " << myArea.southBound << endl;
-//    cout << "the eastBound is  : " << myArea.eastBound  << endl;
-//    cout << "the westBound is  : " << myArea.westBound  << endl;   
-//    cout << "total number of intersections : "<< getNumberOfIntersections() << endl;
-//    cout << "intersection lag and lon example " << getIntersectionPosition(100).lat() << " and " << getIntersectionPosition(100).lon() << endl;
-//    cout << "latDelta are " << myArea.latDelta << endl;
-//    cout << "lonDelta are " << myArea.lonDelta << endl;
-//    cout << "length " << myArea.AREA[14][63].size()<< endl;
-//    
-//    for(int i = 0; i < myArea.AREA[14][63].size(); i++){
-//           cout << (myArea.AREA[14][63])[i] << endl;
-//    }
-//    
-    
-    
-    
-    
-//    for(unsigned i = 0; i < myArea.AREA[28][53].size(); i++){
-//        cout << myArea.AREA[28][53][i] << endl;
-//    }    
-    
-    
-//    //load area here
-//    my_area = new area;
+    //Load your map related data structures below   
     
     //creating the map globe class in loading map
     my_map = new map_data;
-    
         load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
-
     return load_successful;
 }
 
 void close_map() {
     //Clean-up your map related data structures here  
-    
-    
-    
 //    //delete area class here
-//    delete my_area;
-    
+//    delete my_area;   
     //deleting the map globe class in closing map
     delete my_map;
-    
-    
+
     cout << "Closing map" << endl;
     closeStreetDatabase();
-   
 }
 
 
 //Returns street id(s) for the given street name
 //If no street with this name exists, returns a 0-length vector.
-
 std::vector<unsigned> find_street_ids_from_name(std::string street_name){
-//    std::vector<unsigned> result;
-//    
-//    
-//    unsigned  totalStreetNum = getNumberOfStreets();
-//    
-//    StreetIndex i = 0;//0 is <unknown> but cant reach total StreetNum
-//    //several cases:
-//    //a. no such street.  b. more than one street have the same name
-//    for( i = 0; i < totalStreetNum ; i++){
-//        
-//        if(getStreetName(i) == street_name){
-//            result.push_back(i);
-////          cout << i << endl;
-//        }    
-//    }
-//    
-////        //below are testing code which should be used  in test main
-////    vector<string> nameList;
-////    for(int i =160; i <170;i++){
-////        nameList.push_back(getStreetName(i));
-////    }
-////    cout << "the test name list is the following :" << endl;
-////    for(int i =0; i< nameList.size();i++){
-////        cout << " with ID "<< i+160 << " name is :  " << nameList[i] << endl; 
-////        cout << " with name '" << nameList[i] << "' ID is "<< i+160 << endl;
-////        cout << endl;
-////    }
-////    cout << endl;
-
     return my_map->get_all_streetID_streetString(street_name);
-    
-////below are testing code which should be used  in test main
-//    string test1= getStreetName(14);
-//    cout << "test1   is  "<< test1<< endl;
-//    std::vector<unsigned> test;
-//    test =  find_street_ids_from_name(test1);
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-   
-    
 }
 
 //Returns the street segments for the given intersection 
-std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){
-    
-//    std::vector<unsigned> streetSegmentList;
-//    
-//    unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
-//    
-//    for(unsigned i = 0; i < numStreetSegment; i++){
-//        streetSegmentList.push_back(getIntersectionStreetSegment(intersection_id, i));
-//    }    
+std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id){   
     return my_map->get_all_segments_from_intersectionID(intersection_id);
-    
-//    //below are testing code which should be used  in test main
-//    cout << "This is a test using intersection ID 66" <<endl;
-//    string intersection_name = getIntersectionName(66);
-//    cout << "Intersection name is " << intersection_name << endl;
-//    std::vector<unsigned> test = find_intersection_street_segments(66);
-//    cout << "the following ID are the street segment ID that this intersection connected"<<endl;
-//    
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-//    cout << endl;
-//    
-//    for(int j = 0; j < test.size();j++){
-//        cout << "for Street segment ID " << test[j] << ", it";
-//        StreetSegmentInfo testInfo = getStreetSegmentInfo(test[j]);
-//        cout << " from intersection "<< testInfo.from <<"to intersection " << testInfo.to << endl;
-//    }
 }
 
 
@@ -275,29 +77,12 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 //Returns the street names at the given intersection (includes duplicate street 
 //names in returned vector)
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
-//    vector<string> streetNameList;
-//    
-//    vector<unsigned> streetSegmentList;
-//    unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
-//    for(unsigned i = 0; i < numStreetSegment; i++){
-//        streetSegmentList.push_back(getIntersectionStreetSegment(intersection_id, i));
-//    }
-//    //store the streetSegment IDs of the given intersection into a vector
-//    
-//    vector<StreetSegmentInfo> streetSegInfoList;
-//    for(unsigned j = 0; j < numStreetSegment; j++){
-//        streetSegInfoList.push_back(getStreetSegmentInfo(streetSegmentList[j]));
-//    }
-//    //store the SS info into a vector
-//      
-//    for(unsigned j = 0; j < numStreetSegment; j++){
-//        streetNameList.push_back(getStreetName(streetSegInfoList[j].streetID));
-//    }
     vector<string> streetNameList;
     
     vector<unsigned> streetSegmentList;
     unsigned tempsegmentID;
     StreetSegmentInfo temp;
+    
     unsigned numStreetSegment = getIntersectionStreetSegmentCount(intersection_id);
     for(unsigned i = 0; i < numStreetSegment; i++){
         tempsegmentID = getIntersectionStreetSegment(intersection_id, i);
@@ -306,18 +91,6 @@ std::vector<std::string> find_intersection_street_names(unsigned intersection_id
     }
   
     return streetNameList;
-    
-//    //this is the test code which should be used in test Main
-//    cout << endl;
-//    vector<string> streetNameList = find_intersection_street_names(66);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-   
-    
-    
 }
 
 
@@ -355,35 +128,6 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
         }    
     }   
     return false;
-    
-//            //below are testing code which should be used  in test main
-//    cout << "This is a test using intersection ID 66" <<endl;
-//    string intersection_name = getIntersectionName(66);
-//    cout << "Intersection name is " << intersection_name << endl;
-//    std::vector<unsigned> test = find_intersection_street_segments(66);
-//    cout << "the following ID are the street segment ID that this intersection connected"<<endl;
-//    
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-//    cout << endl;
-//    
-//    for(int j = 0; j < test.size();j++){
-//        cout << "for Street segment ID " << test[j] << ", it";
-//        StreetSegmentInfo testInfo = getStreetSegmentInfo(test[j]);
-//        cout << " from intersection "<< testInfo.from <<" to intersection " << testInfo.to << endl;
-//        
-//        if(are_directly_connected(testInfo.from, testInfo.to)){
-//            cout << testInfo.from << " and " << testInfo.to << " are directly connected intersections"<< endl;
-//        }    
-//    }
-//    
-//    if(are_directly_connected(666, 6666)){
-//        cout << "directly connected intersections"<< endl;
-//    }else{
-//        cout << "666 and 6666 are not directly connected intersections " << endl;
-//    }
-//    cout << endl;
 }
 
 
@@ -420,106 +164,22 @@ std::vector<unsigned> find_adjacent_intersections(unsigned intersection_id){
     adjIDList.erase(  unique( adjIDList.begin(), adjIDList.end() ), adjIDList.end()  );
     
     
-    return adjIDList;
-    
-//        //below are testing code which should be used  in test main
-//    cout << "This is a test using intersection ID 66" <<endl;
-//    string intersection_name = getIntersectionName(66);
-//    cout << "Intersection name is " << intersection_name << endl;
-//    std::vector<unsigned> test = find_intersection_street_segments(66);
-//    cout << "the following ID are the street segment ID that this intersection connected"<<endl;
-//    
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-//    cout << endl;
-//    
-//    for(int j = 0; j < test.size();j++){
-//        cout << "for Street segment ID " << test[j] << ", it";
-//        StreetSegmentInfo testInfo = getStreetSegmentInfo(test[j]);
-//        cout << " from intersection "<< testInfo.from <<" to intersection " << testInfo.to << endl;
-//    }
-//    cout << endl;
-//    cout <<" the following are the adjacent intersections' IDs of intersection 66 " <<endl;
-//    vector<unsigned> adjIDList = find_adjacent_intersections(66);
-//    for(int i = 0; i< adjIDList.size(); i++){
-//        cout << adjIDList[i]<<endl;
-//    }
-//    cout << endl;
-    
+    return adjIDList;  
 }
-
-
-
-
 
 
 
 //Returns all street segments for the given street
 std::vector<unsigned> find_street_street_segments(unsigned street_id){
     std::vector<unsigned> SSList;
-    
-    
-//    unsigned totalSSNum = getNumberOfStreetSegments();
-//    
-//    for(unsigned i = 0; i < totalSSNum; i++){
-//        StreetSegmentInfo temp = getStreetSegmentInfo(i);
-//        if(temp.streetID == street_id){//SS is belong to the street specified
-//            SSList.push_back(i);
-//        }
-//    }
     return my_map->get_all_segments_streetID(street_id);  
-//    //below are testing code which should be used  in test main
-//    string test1= getStreetName(14);
-//    cout << "test1   is  "<< test1<< endl;
-//    std::vector<unsigned> test;
-//    test =  find_street_ids_from_name(test1);
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-//    vector<unsigned> SSList = find_street_street_segments(14);
-//    for(unsigned i = 0 ; i < SSList.size(); i++){
-//        cout << "SS ID is " << SSList[i]<< endl;
-//    }
-//    cout << endl;
 }
-
-
 
 
 //Returns all intersections along the a given street
 std::vector<unsigned> find_all_street_intersections(unsigned street_id){
-//    std::vector<unsigned> interList;
-//    
-//    //this is the list of all the street segment of a given street
-//    vector<unsigned> SSList = find_street_street_segments(street_id);
-//    for(unsigned i = 0; i< SSList.size(); i++){
-//        StreetSegmentInfo temp = getStreetSegmentInfo(SSList[i]);
-//        interList.push_back(temp.from);
-//        interList.push_back(temp.to);     
-//    }
-//    
-//    //sort the interList first then erase the duplicate
-//    sort(  interList.begin(), interList.end()  );
-//    interList.erase(  unique( interList.begin(), interList.end() ), interList.end()  );
     return my_map->get_all_intersections_streetID(street_id);
-    
-//    //below are testing code which should be used  in test main
-//    string test1= getStreetName(14);
-//    cout << "test1   is  "<< test1<< endl;
-//    std::vector<unsigned> test;
-//    test =  find_street_ids_from_name(test1);
-//    for(int i = 0; i < test.size(); i++){
-//        cout << " " << test[i] << endl;
-//    }
-//    vector<unsigned> interList = find_all_street_intersections(14);
-//    for(unsigned i = 0 ; i < interList.size(); i++){
-//        cout << "intersection ID is " << interList[i]<< endl;
-//    }
-//    cout << endl;
-
 }
-
 
 
 //Return all intersectionaat ids for two intersecting streets
@@ -562,55 +222,6 @@ std::vector<unsigned> find_intersection_ids_from_street_names(std::string street
     
     
     return commonInterList;
-//    //below are testing code which should be used  in test main
-//    vector<unsigned> street1IDList = find_street_ids_from_name("Woodside Avenue");
-//    vector<unsigned> street2IDList = find_street_ids_from_name("Fairview Avenue");
-//    for(int i = 0; i < street1IDList.size(); i++){
-//        cout << street1IDList[i] << endl;
-//    }
-//    cout << endl;
-//    for(int i = 0; i < street2IDList.size(); i++){
-//        cout << street2IDList[i] << endl;
-//    }
-//    
-//    
-//    cout << "3791 " << getStreetName(3791) << endl; 
-//    cout << "9048 " << getStreetName(9048)<<endl;
-//    cout << "9690 "  <<getStreetName(9690)<<endl;
-//    cout << "17339 " << getStreetName(17339)<<endl;
-//    cout << endl;
-//    
-//    cout << endl;
-//    vector<string> streetNameList = find_intersection_street_names(15813);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-//    
-//     cout << endl;
-//    streetNameList = find_intersection_street_names(15812);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-//    
-//    cout << endl;
-//    streetNameList = find_intersection_street_names(15807);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
-//            
-//    cout << endl;
-//    streetNameList = find_intersection_street_names(15806);
-//    cout << " This is a test for finding street name around an intersection:  " << endl;
-//    for(int i = 0; i < streetNameList.size(); i++){
-//        cout << streetNameList[i] << endl;
-//    }
-//    cout << endl;
 }
 
 //Returns the distance between two coordinates in meters
@@ -625,308 +236,30 @@ double find_distance_between_two_points(LatLon point1, LatLon point2){
     double diffy=y1-y2;
     distance=sqrt(diffx*diffx+diffy*diffy)*EARTH_RADIUS_IN_METERS;
     return distance;
-    
-    //below are testing code which should be used  in test main
-    //need to include the LatLon.h
-//    #include <LatLon.h>
-//    double lan1=6.78,lon1=9.56;
-//    double lan2=6.78,lon2=10.66;
-//    cout<<"test case: first position: ("<<lan1<<","<<lon1<<") Second position: ("<<lan2<<","<<lon2<<")."<<endl;
-//    LatLon a(lan1,lon1);
-//    LatLon b(lan2,lon2);
-//    double distance=find_distance_between_two_points(a,b);
-//    cout<<"distance between two points is: "<<distance<<endl;
 }
 
 //Returns the length of the given street segment in meters
 double find_street_segment_length(unsigned street_segment_id){     
-//    StreetSegmentInfo street_segment = getStreetSegmentInfo(street_segment_id);
-//    LatLon point1 = getIntersectionPosition(street_segment.from);
-//    LatLon point2 = getIntersectionPosition(street_segment.to);
-//    double distance=0.0;
-//    if(street_segment.curvePointCount==0){
-//        //if there is no curves
-//        distance = find_distance_between_two_points(point1, point2);
-//        return distance;
-//    }else{ 
-//        //if there is curve in the street segment
-//        unsigned num = street_segment.curvePointCount;
-//        LatLon temp1=point1,temp2;
-//        for(unsigned i=1; i<=num; i++){
-//            temp2 = getStreetSegmentCurvePoint(street_segment_id,i-1);
-//            distance += find_distance_between_two_points(temp1, temp2);
-//            temp1=temp2;
-//        }
-//        distance+=find_distance_between_two_points(point2,temp2);
-//    }
-//    return distance;
     return my_map->get_segmentlength_segmentID(street_segment_id);
 }
 
 //Returns the length of the specified street in meters
 double find_street_length(unsigned street_id){
-//    double distance=0.0;
-//    std::vector<unsigned> SSList = find_street_street_segments(street_id);
-//    for(unsigned i = 0; i< SSList.size(); i++){
-//        distance += find_street_segment_length(SSList[i]);
-//    }
-//    return distance;
-    
-    //below are test code which should be used in test main
-    // double distance = find_street_length();
-    // cout<<"The longth of the street is "<<distance<<endl;
     return my_map->get_streetlength_streetID(street_id);
 }
 
 //Returns the travel time to drive a street segment in seconds 
 //(time = distance/speed_limit)
 double find_street_segment_travel_time(unsigned street_segment_id){
-//    //not sure it is correct or not
-//    double distance=find_street_segment_length(street_segment_id);
-//    StreetSegmentInfo street_segment=getStreetSegmentInfo(street_segment_id);
-//    double speedLimit=1000*street_segment.speedLimit/(60*60);
-//    double time = distance/speedLimit;
-//    return time;
-//    
-//    //below are test code which should be used in test main
-//    // double time = find_street_segment_travel_time();
-//    // cout<<"Time to travel is "<<time<<endl;
     return my_map->get_traveltime_segmentID(street_segment_id);
 }
 
 //Returns the nearest point of interest to the given position
 unsigned find_closest_point_of_interest(LatLon my_position){
-    
-    point currentPosition = point(my_position.lon(), my_position.lat());
-    vector<value> nearestFive;
-    rtForPOI.query(bgi::nearest(currentPosition,5), std::back_inserter(nearestFive));
-    
-    double distance =0.0;
-    unsigned interest_ID=0;
-    bool time =true;
-    
-    for(unsigned i = 0; i < nearestFive.size(); i++){
-        LatLon current = getPointOfInterestPosition(nearestFive[i].second);
-        double currentDiff = find_distance_between_two_points(my_position,current);
-        if(time){
-            distance = currentDiff;
-            interest_ID= nearestFive[i].second;
-            time=false;
-        }
-        if(distance>currentDiff){
-            distance=currentDiff;
-            interest_ID = nearestFive[i].second;
-        }
-    } 
-    return interest_ID;   
-   
-//    double distance =0.0;
-//    unsigned interest_ID=0;
-//    bool time =true;
-//    unsigned totalSSNum = getNumberOfPointsOfInterest();
-//    for(unsigned i = 0; i < totalSSNum; i++){
-//        LatLon current = getPointOfInterestPosition(i);
-//        double currentDiff = find_distance_between_two_points(my_position,current);
-//        if(time){
-//            distance = currentDiff;
-//            interest_ID= i;
-//            time=false;
-//        }
-//        if(distance>currentDiff){
-//            distance=currentDiff;
-//            interest_ID = i;
-//        }
-//    } 
-//    return interest_ID;
+    return my_map->closest_interest_point(my_position);
 }
 
 //Returns the the nearest intersection to the given position
 unsigned find_closest_intersection(LatLon my_position){
-    
-    point currentPosition = point(my_position.lon(), my_position.lat());
-    vector<value> nearestFive;
-    rt.query(bgi::nearest(currentPosition,35), std::back_inserter(nearestFive));
-    
-    
-//    for(unsigned j = 0; j < nearestFive.size(); j++){
-//        cout<< nearestFive[j].second << endl;
-//    }
-    
-    double distance =0.0;
-    unsigned intersection_ID = 0;
-    bool time = true;
-    
-    for(unsigned i = 0; i < nearestFive.size(); i++){
-        LatLon current = getIntersectionPosition(nearestFive[i].second);
-        double currentDiff = find_distance_between_two_points(my_position,current);
-        if(time){
-            distance = currentDiff;
-            intersection_ID = nearestFive[i].second;
-            time = false;
-        }
-        if(currentDiff < distance){
-            distance = currentDiff;
-            intersection_ID = nearestFive[i].second;
-        }
-    }
-    
-    return intersection_ID;
+    return my_map->closest_intersection_point(my_position);
 }    
-  
-//    double distance =0.0;
-//    unsigned intersection_ID=0;
-//    bool time =true;
-//    unsigned totalInterNum = getNumberOfIntersections();
-//    for(unsigned i = 0; i < totalInterNum; i++){
-//        LatLon current = getIntersectionPosition(i);
-//        double currentDiff = find_distance_between_two_points(my_position,current);
-//        if(time){
-//            distance = currentDiff;
-//            intersection_ID= i;
-//            time=false;
-//        }
-//        if(distance>currentDiff){
-//            distance=currentDiff;
-//            intersection_ID = i;
-//        }
-//    }
-//    return intersection_ID;
-
-
-
-
-//        //the following is the advanced search method
-//    //first if my_position is out of MBR, then do the normal way
-//    if((my_position.lat() >= myArea.northBound - myArea.latDelta) || 
-//       (my_position.lat() <= myArea.southBound + myArea.latDelta) ||
-//       (my_position.lon() >= myArea.eastBound - myArea.lonDelta) ||
-//       (my_position.lon() <= myArea.westBound + myArea.lonDelta)   ){
-//        double distance =0.0;
-//        unsigned intersection_ID=0;
-//        bool time = true;
-//        unsigned totalInterNum = getNumberOfIntersections();
-//        for(unsigned i = 0; i < totalInterNum; i++){
-//            LatLon current = getIntersectionPosition(i);
-//            double currentDiff = find_distance_between_two_points(my_position,current);
-//            if(time){
-//                distance = currentDiff;
-//                intersection_ID= i;
-//                time=false;
-//            }
-//            if(distance>currentDiff){
-//                distance=currentDiff;
-//                intersection_ID = i;
-//            }
-//        }
-//        return intersection_ID;
-//    }
-//    
-//    //then if my_position is within the MBR
-//    int myPositionRowIndex = (my_position.lat() - myArea.southBound) / myArea.latDelta;
-//    int myPositionColIndex = (my_position.lon() - myArea.westBound ) / myArea.lonDelta;
-//    
-//    
-//    //looking around 9 sub areas, get a total list of ID of points with those 9 areas
-//    vector<unsigned> totalIDListOfSurround;
-//    
-//    int checkLevel = 1;
-//    while(totalIDListOfSurround.size() == 0){
-//        for(int i = myPositionRowIndex - checkLevel; i <= myPositionRowIndex + checkLevel; i++){
-//            for(int j = myPositionColIndex - checkLevel; j <= myPositionColIndex + checkLevel; j++){
-//                vector<unsigned> temp = myArea.AREA[i][j];
-//                totalIDListOfSurround.insert( totalIDListOfSurround.end(), temp.begin(), temp.end() );
-//            }
-//        }
-//        checkLevel = checkLevel + 1;
-//    }
-//    
-////    for(int i = myPositionRowIndex - 1; i <= myPositionRowIndex + 1; i++){
-////        for(int j = myPositionColIndex - 1; j <= myPositionColIndex + 1; j++){
-////            vector<unsigned> temp = myArea.AREA[i][j];
-////            totalIDListOfSurround.insert( totalIDListOfSurround.end(), temp.begin(), temp.end() );
-////        }
-////    }
-////    
-//    
-//    
-//    
-//    
-//    
-//    double distance =0.0;
-//    unsigned intersection_ID=0;
-//    bool time = true;
-//    unsigned surroundInterNum = totalIDListOfSurround.size();
-//    
-//    for(unsigned i = 0; i < surroundInterNum; i++){
-//        LatLon current = myArea.interLatLonList[totalIDListOfSurround[i]];
-//        double currentDiff = find_distance_between_two_points(my_position,current);
-//        if(time){
-//            distance = currentDiff;
-//            intersection_ID = totalIDListOfSurround[i];
-//            time = false;
-//        }
-//        if(currentDiff < distance){
-//            distance = currentDiff;
-//            intersection_ID = totalIDListOfSurround[i];
-//        }
-//    }
-//    
-//    return intersection_ID;
-    
-//    //the following is the advanced search method
-//    //first if my_position is out of MBR, then do the normal way
-//    if((my_position.lat() >= northBound) || 
-//       (my_position.lat() <= southBound) ||
-//       (my_position.lon() >= eastBound ) ||
-//       (my_position.lon() <= westBound )   ){
-//        double distance =0.0;
-//        unsigned intersection_ID=0;
-//        bool time =true;
-//        unsigned totalInterNum = getNumberOfIntersections();
-//        for(unsigned i = 0; i < totalInterNum; i++){
-//            LatLon current = getIntersectionPosition(i);
-//            double currentDiff = find_distance_between_two_points(my_position,current);
-//            if(time){
-//                distance = currentDiff;
-//                intersection_ID= i;
-//                time=false;
-//            }
-//            if(distance>currentDiff){
-//                distance=currentDiff;
-//                intersection_ID = i;
-//            }
-//        }
-//        return intersection_ID;
-//    }
-//    
-//    //then if my_position is within the MBR
-//    int myPositionRowIndex = (my_position.lat() - southBound) / latDelta;
-//    int myPositionColIndex = (my_position.lon() - westBound ) / lonDelta;
-//    //looking around 9 sub areas, get a total list of ID of points with those 9 areas
-//    vector<unsigned> totalIDListOfSurround;
-//    for(int i = myPositionRowIndex - 1; i <= myPositionRowIndex + 1; i++){
-//        for(int j = myPositionColIndex - 1; j <= myPositionColIndex + 1; j++){
-//            vector<unsigned> temp = AREA[i][j];
-//            totalIDListOfSurround.insert( totalIDListOfSurround.end(), temp.begin(), temp.end() );
-//        }
-//    }
-//    
-//    double distance =0.0;
-//    unsigned intersection_ID=0;
-//    bool time = true;
-//    unsigned surroundInterNum = totalIDListOfSurround.size();
-//    for(unsigned i = 0; i < surroundInterNum; i++){
-//        LatLon current = interLatLonList[totalIDListOfSurround[i]];
-//        double currentDiff = find_distance_between_two_points(my_position,current);
-//        if(time){
-//            distance = currentDiff;
-//            intersection_ID = totalIDListOfSurround[i];
-//            time = false;
-//        }
-//        if(currentDiff < distance){
-//            distance = currentDiff;
-//            intersection_ID = totalIDListOfSurround[i];
-//        }
-//    }
-//    
-//    return intersection_ID;

@@ -28,8 +28,9 @@
 #include <algorithm>
 #include <math.h>
 #include <LatLon.h>
-#include "area.h"
 #include <list> 
+
+
 
 using namespace std;
 //Program exit codes
@@ -65,31 +66,11 @@ int main(int argc, char** argv) {
 
     std::cout << "Successfully loaded map '" << map_path << endl;
 
-    
-    
-    
-    
+ 
     
     //You can now do something with the map data
-    cout << find_closest_intersection(LatLon(43.7325325012207, -79.09117126464844)) << endl;
-  
 
-//    cout << endl;
-//    cout << "cloest point is " << find_closest_intersection(LatLon(43.7325325012207, -79.09117126464844)) << endl;
-//    cout << endl;
-//
-//       LatLon temp = getIntersectionPosition(7137);
-//       cout << temp.lat() << endl;
-//       cout << temp.lon() << endl;
-//       
-//       cout << endl;
-//       temp = getIntersectionPosition(55193);
-//       cout << temp.lat() << endl;
-//       cout << temp.lon() << endl;
-//    
- 
-   
-    
+  
     
     
     

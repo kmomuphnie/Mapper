@@ -8,83 +8,105 @@
 
 // constructor
 map_data::map_data(){
+    
+    //load total numbers of streets, street segments, and intersections into local variable
     unsigned totalsegmentNum = getNumberOfStreetSegments();
     unsigned totalstreetNum = getNumberOfStreets();
     unsigned totalIntersectionsNum = getNumberOfIntersections();
     
+    //change the size of storing variables
     intersection_street_segments.resize(totalIntersectionsNum);
     street_segments.resize(totalstreetNum);
     street_intersections.resize(totalstreetNum);
+    
+    
     streetID_streetlength.insert(streetID_streetlength.begin(),totalstreetNum,0.0);
     
+    //store data into vector: intersection_street_segments
     for(unsigned intersection = 0; intersection < totalIntersectionsNum;++intersection){
+        //loop through all the intersections
+        
         for(unsigned i=0; i< getIntersectionStreetSegmentCount(intersection);++i){
+            //loop through all the segments which connected to the intersection
             auto const ss_id = getIntersectionStreetSegment(intersection,i);
             intersection_street_segments[intersection].push_back(ss_id);
         }
     }
     
     
-    
+    //store data into vectors
     for(unsigned segmentID=0;segmentID<totalsegmentNum;segmentID++){
+        //loop though all the street segments
         StreetSegmentInfo temp = getStreetSegmentInfo(segmentID);
         unsigned tempstreetID = temp.streetID;
-            street_segments[tempstreetID].push_back(segmentID);
-            street_intersections[tempstreetID].push_back(temp.from);
-            street_intersections[tempstreetID].push_back(temp.to);
-            
-            LatLon point1 = getIntersectionPosition(temp.from);
-            LatLon point2 = getIntersectionPosition(temp.to);
-            double distance=0.0;
-            double speedLimit=1000*temp.speedLimit/(60*60);
-            if(temp.curvePointCount==0){
-                //if there is no curves
-                distance = find_distance_between_two_points(point1, point2);
-            }
-            else{
-                //if there is curve in the street segment
-                unsigned num = temp.curvePointCount;
-                LatLon temp1=point1,temp2;
-                for(unsigned i=1; i<=num; i++){
-                    temp2 = getStreetSegmentCurvePoint(segmentID,i-1);
-                    distance += find_distance_between_two_points(temp1, temp2);
-                    temp1=temp2;
-                }
-                distance+=find_distance_between_two_points(point2,temp2);
-            }
-            segmentID_segmentlength.push_back(distance);
-            segmentID_traveltime.push_back(distance/speedLimit);
-            streetID_streetlength[tempstreetID]+=distance;
+        //store street segments into vector
+        street_segments[tempstreetID].push_back(segmentID);
+        //store the intersection ids which are located on the same street
+        street_intersections[tempstreetID].push_back(temp.from);
+        street_intersections[tempstreetID].push_back(temp.to);
+        
+        //calculate the distance and speed
+        //get information and make them become local variables
+        LatLon point1 = getIntersectionPosition(temp.from);
+        LatLon point2 = getIntersectionPosition(temp.to);
+        double distance = 0.0;
+        double speedLimit = 1000*temp.speedLimit/(60*60);
+        
+        //calculate length of one street segment
+        if(temp.curvePointCount==0){
+            //if there is no curves
+            distance = find_distance_between_two_points(point1, point2);
         }
+        else{
+            //if there is curve in the street segment
+            unsigned num = temp.curvePointCount;
+            LatLon temp1 = point1,temp2;
+            for(unsigned i=1; i<=num; i++){
+                temp2 = getStreetSegmentCurvePoint(segmentID,i-1);
+                distance += find_distance_between_two_points(temp1, temp2);
+                temp1 = temp2;
+            }
+            distance += find_distance_between_two_points(point2,temp2);
+        }
+        //store information into vectors
+        segmentID_segmentlength.push_back(distance);
+        segmentID_traveltime.push_back(distance/speedLimit);
+        //increase street length
+        streetID_streetlength[tempstreetID] += distance;
+    }
     
-    for(unsigned streetID=0;streetID<totalstreetNum;++streetID){
+    
+    //store data into vector: streetString_streetIDs
+    for(unsigned streetID = 0;streetID < totalstreetNum; ++streetID){
         //sort the street intersections first 
-        sort(  street_intersections[streetID].begin(), street_intersections[streetID].end()  );
-        street_intersections[streetID].erase(  unique( street_intersections[streetID].begin(), street_intersections[streetID].end() ), street_intersections[streetID].end()  );
-//later will be used//        
-//        //set all streetnameID map
-//        std::string tempstreetname = getStreetName(streetID);
-//        auto it = streetnameID.find(tempstreetname);
-//        //if find
-//        if(it!=streetnameID.end()){
-//            streetnameID_streetID[it->second].push_back(streetID);
-//        }
-//        //if did not find
-//        else {
-//            streetnameID[tempstreetname]=streetnameIDNum;
-//            streetnameID_streetID.push_back(std::vector<unsigned>());
-//            streetnameID_streetID[streetnameIDNum].push_back(streetID);
-//            streetnameIDNum++;
-//        }
-//        
+        sort(street_intersections[streetID].begin(), street_intersections[streetID].end());
+        street_intersections[streetID].erase(unique( street_intersections[streetID].begin(), street_intersections[streetID].end()), street_intersections[streetID].end());
+          
+        
         //set streetstring_streetIDs unordermap
         std::string tempstreetname = getStreetName(streetID);
         streetString_streetIDs[tempstreetname].push_back(streetID);
     }
+    
+    // load points of intersection and interest to r-tree
+    for(unsigned i = 0; i < getNumberOfIntersections(); i++){
+        LatLon temp = getIntersectionPosition(i);
+        point tempPos = point(temp.lon(), temp.lat());
+        rt.insert(std::make_pair(tempPos, i));
+    }
+    
+    
+    for(unsigned i = 0; i < getNumberOfPointsOfInterest(); i++){
+        LatLon temp = getPointOfInterestPosition(i);
+        point tempPOI = point(temp.lon(), temp.lat());
+        rtForPOI.insert(std::make_pair(tempPOI, i));
+    }
+    
 }
     
 
-
+//get information functions
+//detailed descriptions are listed in the header file
 std::vector<unsigned>map_data::get_all_segments_from_intersectionID (unsigned inputintersectionID) const{
     return intersection_street_segments[inputintersectionID];
 }
@@ -112,4 +134,56 @@ double map_data::get_traveltime_segmentID(unsigned inputsegmentID) const{
 
 double map_data::get_streetlength_streetID(unsigned inputstreetID) const{
     return streetID_streetlength[inputstreetID];
+}
+
+unsigned map_data::closest_interest_point(LatLon my_position) const{ 
+    point currentPosition = point(my_position.lon(), my_position.lat());
+    vector<value> nearestFive;//the vector of list of 5 nearest points, their LatLons and their IDs
+    rtForPOI.query(bgi::nearest(currentPosition,5), std::back_inserter(nearestFive));
+    
+    double distance =0.0;
+    unsigned interest_ID=0;
+    bool time =true;
+    //check the nearest 5 points by hands, one by one
+    for(unsigned i = 0; i < nearestFive.size(); i++){
+        LatLon current = getPointOfInterestPosition(nearestFive[i].second);
+        double currentDiff = find_distance_between_two_points(my_position,current);
+        if(time){
+            distance = currentDiff;
+            interest_ID= nearestFive[i].second;
+            time=false;
+        }
+        if(distance>currentDiff){
+            distance=currentDiff;
+            interest_ID = nearestFive[i].second;
+        }
+    } 
+    return interest_ID;
+}
+
+unsigned map_data::closest_intersection_point(LatLon my_position) const{
+    point currentPosition = point(my_position.lon(), my_position.lat());
+    vector<value> nearestFive;
+    //initially want to only check the nearest 5 points, but there is a corner case, so 
+    //change it to the nearest 35 points. problem solved, but the name of the vector remains as the "nearestFive"
+    rt.query(bgi::nearest(currentPosition,35), std::back_inserter(nearestFive));
+    
+    double distance =0.0;
+    unsigned intersection_ID = 0;
+    bool time = true;
+    //check the nearest 5 points by hands, one by one
+    for(unsigned i = 0; i < nearestFive.size(); i++){
+        LatLon current = getIntersectionPosition(nearestFive[i].second);
+        double currentDiff = find_distance_between_two_points(my_position,current);
+        if(time){
+            distance = currentDiff;
+            intersection_ID = nearestFive[i].second;
+            time = false;
+        }
+        if(currentDiff < distance){
+            distance = currentDiff;
+            intersection_ID = nearestFive[i].second;
+        }
+    }
+    return intersection_ID;
 }

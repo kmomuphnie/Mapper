@@ -16,8 +16,6 @@
       </df>
       <df name="libstreetmap">
         <df name="src">
-          <in>area.cpp</in>
-          <in>area.h</in>
           <in>m1.cpp</in>
           <in>map_data.cpp</in>
           <in>map_data.h</in>
@@ -34,6 +32,7 @@
           <in>m1_func_street_toronto_canada_public.cpp</in>
           <in>m1_load_maps_public.cpp</in>
           <in>m1_perf_distance-time_toronto_canada_public.cpp</in>
+          <in>m1_perf_find_street_ids_from_name.cpp</in>
           <in>m1_perf_intersection_toronto_canada_public.cpp</in>
           <in>m1_perf_spatial_toronto_canada_public.cpp</in>
           <in>m1_perf_street_toronto_canada_public.cpp</in>
