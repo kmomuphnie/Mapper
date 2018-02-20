@@ -20,6 +20,7 @@
  */
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
+#include "OSMDatabaseAPI.h"
 #include <string.h>
 #include <vector>
 #include <algorithm>
@@ -27,7 +28,10 @@
 #include <map>
 #include "map_data.h"
 #include <list> 
-
+#include "OSMEntity.h"
+#include "OSMNode.h"
+#include "OSMWay.h"
+#include "OSMRelation.h"
 using namespace std;
         
 map_data const* my_map;
@@ -40,9 +44,15 @@ bool load_map(std::string map_path) {
         return false;
     }
     //Load your map related data structures below   
+    size_t map_path_id;
+    while ((map_path_id=map_path.find("streets"))!=string::npos)
+        map_path.replace(map_path_id,7,"osm");
+    loadOSMDatabaseBIN(map_path);
     
     //creating the map globe class in loading map
     my_map = new map_data;
+    
+    my_map->get_intersections_latitude_cartesian_intersectionsID(1);
         load_successful = true; //Make sure this is updated to reflect whether
                             //loading the map succeeded or failed
     return load_successful;
@@ -54,8 +64,6 @@ void close_map() {
 //    delete my_area;   
     //deleting the map globe class in closing map
     delete my_map;
-
-    cout << "Closing map" << endl;
     closeStreetDatabase();
 }
 
@@ -78,8 +86,6 @@ std::vector<unsigned> find_intersection_street_segments(unsigned intersection_id
 //names in returned vector)
 std::vector<std::string> find_intersection_street_names(unsigned intersection_id){
     vector<string> streetNameList;
-    
-    vector<unsigned> streetSegmentList;
     unsigned tempsegmentID;
     StreetSegmentInfo temp;
     
@@ -115,7 +121,7 @@ bool are_directly_connected(unsigned intersection_id1, unsigned intersection_id2
                 StreetSegmentInfo temp = getStreetSegmentInfo(SSIDList1[i]);
                 //check the oneway situation
                 if(temp.oneWay){
-                    if((temp.from == intersection_id1) && (temp.to == intersection_id2)){
+                    if(temp.from == intersection_id1){
                         return true;
                     }
                 }else{
@@ -262,4 +268,4 @@ unsigned find_closest_point_of_interest(LatLon my_position){
 //Returns the the nearest intersection to the given position
 unsigned find_closest_intersection(LatLon my_position){
     return my_map->closest_intersection_point(my_position);
-}    
+}

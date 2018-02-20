@@ -22,6 +22,7 @@
 #include <string>
 #include <StreetsDatabaseAPI.h>
 #include "m1.h"
+#include "m2.h"
 #include <vector>
 #include <unordered_map>
 #include <map>
@@ -29,6 +30,7 @@
 #include <math.h>
 #include <LatLon.h>
 #include <list> 
+#include "graphics.h"
 
 
 
@@ -75,6 +77,7 @@ int main(int argc, char** argv) {
     
     
     //Clean-up the map data and related data structures
+    draw_map();
     close_map(); 
 
     return SUCCESS_EXIT_CODE;
