@@ -6,15 +6,38 @@
         <df name="release">
           <df name="libstreetmap">
             <df name="src">
+              <df name="easygl">
+              </df>
             </df>
-            <df name="tests">
+          </df>
+          <df name="main">
+            <df name="src">
             </df>
           </df>
         </df>
       </df>
       <df name="libstreetmap">
+        <df name="resources">
+        </df>
         <df name="src">
+          <df name="easygl">
+            <in>Surface.cpp</in>
+            <in>Surface.h</in>
+            <in>SurfaceImpl.cpp</in>
+            <in>SurfaceImpl.h</in>
+            <in>easygl_constants.h</in>
+            <in>fontcache.cpp</in>
+            <in>fontcache.h</in>
+            <in>graphics.cpp</in>
+            <in>graphics.h</in>
+            <in>graphics_automark.h</in>
+            <in>graphics_state.cpp</in>
+            <in>graphics_state.h</in>
+            <in>graphics_types.cpp</in>
+            <in>graphics_types.h</in>
+          </df>
           <in>m1.cpp</in>
+          <in>m2.cpp</in>
           <in>map_data.cpp</in>
           <in>map_data.h</in>
         </df>
@@ -205,8 +228,6 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
-        <gdb_signals>
-        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>
@@ -252,8 +273,6 @@
         <gdb_interceptlist>
           <gdbinterceptoptions gdb_all="false" gdb_unhandled="true" gdb_unexpected="true"/>
         </gdb_interceptlist>
-        <gdb_signals>
-        </gdb_signals>
         <gdb_options>
           <DebugOptions>
           </DebugOptions>
