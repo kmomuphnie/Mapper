@@ -62,7 +62,9 @@ void act_on_button_press(float x, float y, t_event_buttonPressed event) {
     mouseclick = true;
     mousex = x;
     mousey = y;
+    cout<<event.button<<endl;
     draw_screen();
+    
 //    LatLon mouseclicklatlon(x/cos(my_map->get_avg_lat())/DEG_TO_RAD,y);
 //    unsigned closestintersectionID = my_map->closest_intersection_point(mouseclicklatlon);
 //    setcolor(t_color(255,55,0,255));

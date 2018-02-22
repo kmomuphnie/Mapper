@@ -1,0 +1,271 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+
+/* 
+ * File:   map_data.h
+ * Author: wangha78
+ *
+ * Created on January 31, 2018, 3:44 PM
+ */
+
+
+#ifndef MAP_DATA_H
+#define MAP_DATA_H
+
+//including libraries which are used in this program
+#include <string>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <algorithm>
+#include <math.h>
+#include <iostream>
+#include <StreetsDatabaseAPI.h>
+#include "OSMDatabaseAPI.h"
+#include "m1.h"
+#include "graphics_types.h"
+#include "OSMEntity.h"
+#include "OSMNode.h"
+#include "OSMWay.h"
+#include "OSMRelation.h"
+#include "Ternalkdtreehelper.h"
+//----------------------------STRUCT HEADERS-----------------------------//
+struct intersection_data {
+    LatLon position;
+    double longitude_cartesian;
+    double latitude_cartesian;
+    std::string name;
+};
+struct feature_data {
+    unsigned npoints;
+    t_point* point;
+    bool openfeature;
+    std::string name;
+};
+
+struct interest_data {
+    unsigned interestID;
+    std::string name;
+};
+
+//----------------------------STRUCT HEADERS-----------------------------//
+
+using namespace std;
+class map_data{
+    //private data variables
+    private: 
+        //max and min value for latitude-average and map range
+        //no idea how small it is so set to ID(0)
+        double max_lat = getIntersectionPosition(0).lat();
+        double max_lon = getIntersectionPosition(0).lon();
+        double min_lat = max_lat;
+        double min_lon = max_lon;
+        double avg_lat;
+        
+        //kd-tree intersection
+        std::vector<Point> kdtree_intersections;
+        //kd-tree interest
+        std::vector<Point> kdtree_interests;
+        
+        //store all street names and their IDs
+        std::unordered_map<std::string,std::vector<unsigned> > streetString_streetIDs;
+        //later would be used//std::map<std::string,unsigned> streetnameID;
+        
+        //vector which stores unsigned variables. these unsigned are entire street segments
+        std::vector<std::vector<unsigned> > street_segments;
+        
+        //vector which stores vectors.
+        //vector is the entire intersections in the program
+        //stored vector is the street segments which connected to every intersection
+        std::vector<std::vector<unsigned> > intersection_street_segments;
+        
+        //stored all the intersections located on a street into a vector. Organize them into another vector. 
+        std::vector<std::vector<unsigned> > street_intersections;
+        
+        //Not sure whether it is needed or not
+        //std::vector<std::vector<unsigned> > streetnameID_streetID;
+        
+        //store the length of every street segments. (ordered by id number)
+        std::vector<double> segmentID_segmentlength;
+        
+        //store the length of every street.(ordered by id number)
+        std::vector<double> streetID_streetlength;
+        
+        //store the fastest speed to travel through one street segment.
+        std::vector<double> segmentID_traveltime;
+        
+        //store the intersection data
+        std::vector<intersection_data> intersections;
+        
+        
+        
+        
+        //store the feature data poly
+        std::vector<feature_data> parks;
+        std::vector<feature_data> beachs;
+        std::vector<feature_data> lakes;
+        std::vector<feature_data> islands;
+        std::vector<feature_data> buildings;
+        std::vector<feature_data> greenspaces;
+        std::vector<feature_data> golfcourses;
+        //store the feature data line
+        std::vector<feature_data> rivers;
+        std::vector<feature_data> shorelines;
+        std::vector<feature_data> streams;
+        //store the road data line
+        std::vector<feature_data> Lspeed;
+        std::vector<feature_data> Mspeed;
+        std::vector<feature_data> Hspeed;
+        
+        //store different importance ways
+        //store all OSMwayID types
+        std::unordered_map<OSMID,std::string> OSMID_typestring;
+        //std::unordered_map<OSMID,std::string> OSMID_OSMwayname;
+        //store the highway motorway
+        std::vector<feature_data> motorway;
+        //store the highway trunk
+        std::vector<feature_data> trunk;
+        //store the highway primary
+        std::vector<feature_data> primary;
+        //store the highway secondary
+        std::vector<feature_data> secondary;
+        //store the highway tertiary
+        std::vector<feature_data> tertiary;
+        //store the highway unclassified
+        std::vector<feature_data> unclassified;
+        //store the highway residential
+        std::vector<feature_data> residential;
+        //store the highway service
+        std::vector<feature_data> service;
+        //store the highway otherhighway
+        std::vector<feature_data> otherhighway;
+        
+        std::vector<interest_data> entertainment;
+        std::vector<interest_data> transportation;
+        std::vector<interest_data> education;
+        std::vector<interest_data> medical;
+        std::vector<interest_data> restaurant;
+        std::vector<interest_data> hotel;
+        std::vector<interest_data> bank;
+        std::vector<interest_data> other;
+    //public functions   
+    public:
+        
+        //constructor of a class
+        map_data();
+        //de-constructor of a class
+        ~map_data();
+        
+        //return all street segments which are connected to the street
+        std::vector<unsigned> get_all_segments_streetID (unsigned inputstreetID)  const;
+        
+        //return all street segments which are connected to one intersection point
+        std::vector<unsigned> get_all_segments_from_intersectionID (unsigned inputintersectionID) const;
+        
+        //return all intersections on a particular street
+        std::vector<unsigned> get_all_intersections_streetID (unsigned inputstreetID)  const;
+        
+        //return all street id which are corresponding to one street name
+        std::vector<unsigned> get_all_streetID_streetString (std::string inputstreetString) const;
+        
+        //return the length of one street segment in meters
+        double get_segmentlength_segmentID (unsigned inputsegmentID ) const;
+        
+        //return the length of one street in meters
+        double get_streetlength_streetID (unsigned inputstreetID ) const;
+        
+        //return the shortest travel time of one street segment 
+        double get_traveltime_segmentID (unsigned inputsegmentID ) const;
+        
+        //return r-tree interest close point
+        unsigned closest_interest_point(LatLon my_position) const;
+        
+        //return r-tree intersection close point
+        unsigned closest_intersection_point(LatLon my_position) const;
+        
+        //return intersections longitude by intersectionsID
+        double get_intersections_longitude_cartesian_intersectionsID(unsigned inputintersectionID)const;
+        //return intersections latitude by intersectionsID
+        double get_intersections_latitude_cartesian_intersectionsID(unsigned inputintersectionID)const;
+        
+        // got max and min and average for longitude and latitude
+        double get_max_lat()const;
+        double get_max_lon()const;
+        double get_min_lat()const;
+        double get_min_lon()const;
+        double get_avg_lat()const;
+        
+        // get parks_data vector
+        std::vector<feature_data> get_parks_data()const;
+        // get beachs_data vector
+        std::vector<feature_data> get_beachs_data()const;
+        // get lakes_data vector
+        std::vector<feature_data> get_lakes_data()const;
+        // get islands_data vector
+        std::vector<feature_data> get_islands_data()const;
+        // get buildings_data vector
+        std::vector<feature_data> get_buildings_data()const;
+        // get greenspaces_data vector
+        std::vector<feature_data> get_greenspaces_data()const;
+        // get golfcourses_data vector
+        std::vector<feature_data> get_golfcourses_data()const;
+        // get rivers_data vector
+        std::vector<feature_data> get_rivers_data()const;
+        // get shorelines_data vector
+        std::vector<feature_data> get_shorelines_data()const;
+        // get streams_data vector
+        std::vector<feature_data> get_streams_data()const;
+        
+        
+        // get Lspeed_data vector
+        std::vector<feature_data> get_Lspeed_data()const;
+        // get Mspeed_data vector
+        std::vector<feature_data> get_Mspeed_data()const;
+        // get Hspeed_data vector
+        std::vector<feature_data> get_Hspeed_data()const;
+        
+        
+        // get motorway data vector
+        std::vector<feature_data> get_motorway_data()const;
+        // get trunk data vector
+        std::vector<feature_data> get_trunk_data()const;
+        // get primary data vector
+        std::vector<feature_data> get_primary_data()const;
+        // get secondary data vector
+        std::vector<feature_data> get_secondary_data()const;
+        // get tertiary data vector
+        std::vector<feature_data> get_tertiary_data()const;
+        // get unclassified data vector
+        std::vector<feature_data> get_unclassified_data()const;
+        // get residential data vector
+        std::vector<feature_data> get_residential_data()const;
+        // get service data vector
+        std::vector<feature_data> get_service_data()const;
+        // get otherhighway data vector
+        std::vector<feature_data> get_otherhighway_data()const;
+        
+        // get entertainment data vector
+        std::vector<interest_data> get_entertainment_data()const;
+        
+        // get transportation data vector
+        std::vector<interest_data> get_transportation_data()const;
+        
+        //get education data vector
+        std::vector<interest_data> get_education_data()const;
+        
+        //get medical data vector
+        std::vector<interest_data> get_medical_data()const;
+        
+        //get restaurant data vector
+        std::vector<interest_data> get_restaurant_data()const;
+        
+        //get hotel data vector
+        std::vector<interest_data> get_hotel_data()const;
+        
+        //get other data vector
+        std::vector<interest_data> get_other_data()const;
+};
+#endif /* MAP_DATA_H */

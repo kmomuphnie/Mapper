@@ -105,6 +105,7 @@ map_data::map_data() {
     unsigned totalIntersectionsNum = getNumberOfIntersections();
     unsigned totalfeatureNum = getNumberOfFeatures();
     unsigned totalwayNum = getNumberOfWays();
+    unsigned totalinterestNum = getNumberOfPointsOfInterest();
     //change the size of storing variables
     intersection_street_segments.resize(totalIntersectionsNum);
     street_segments.resize(totalstreetNum);
@@ -113,7 +114,8 @@ map_data::map_data() {
     segmentID_traveltime.resize(totalsegmentNum);
     streetID_streetlength.resize(totalstreetNum);
     intersections.resize(totalIntersectionsNum);
-    
+    kdtree_intersections.resize(totalIntersectionsNum);
+    kdtree_interests.resize(totalinterestNum);
     //store the wayOSMID type to unordered map
     for (unsigned i = 0;i<totalwayNum;i++) {
         for(unsigned j=0;j<getTagCount(getWayByIndex(i));j++){
@@ -136,12 +138,7 @@ map_data::map_data() {
             //loop through all the segments which connected to the intersection
             auto const ss_id = getIntersectionStreetSegment(intersection,i);
             intersection_street_segments[intersection].push_back(ss_id);
-        }
-        
-        // load points of intersection to r-tree
-        LatLon temp = getIntersectionPosition(intersection);
-        point tempPos = point(temp.lon(), temp.lat());
-        rt.insert(std::make_pair(tempPos, intersection));
+        } 
         
         //loop through all the intersection data include position and name
         intersections[intersection].position = getIntersectionPosition(intersection);
@@ -151,6 +148,11 @@ map_data::map_data() {
         min_lat = std::min(min_lat,intersections[intersection].position.lat());
         max_lon = std::max(max_lon,intersections[intersection].position.lon());
         min_lon = std::min(min_lon,intersections[intersection].position.lon());
+        
+        // load points of intersection to r-tree
+        kdtree_intersections[intersection].x[0]=intersections[intersection].position.lon();
+        kdtree_intersections[intersection].x[1]=intersections[intersection].position.lat();
+        kdtree_intersections[intersection].id=intersection;  
     }
     
     //calculate latitude-average after the intersection loop
@@ -285,12 +287,36 @@ map_data::map_data() {
         streetString_streetIDs[tempstreetname].push_back(streetID);
     }
     
-    // load points of interest to r-tree
-    for(unsigned i = 0; i < getNumberOfPointsOfInterest(); i++){
-        LatLon temp = getPointOfInterestPosition(i);
-        point tempPOI = point(temp.lon(), temp.lat());
-        rtForPOI.insert(std::make_pair(tempPOI, i));
+    // load points of interest to kd-tree
+    for(unsigned i = 0; i < totalinterestNum; i++){
+        kdtree_interests[i].x[0]=getPointOfInterestPosition(i).lon();
+        kdtree_interests[i].x[1]=getPointOfInterestPosition(i).lat();
+        kdtree_interests[i].id=i;
+        //filter the types of point of interests
+        string interestType = getPointOfInterestType(i);
+        interest_data insertInterest;
+        insertInterest.interestID = i;
+        insertInterest.name = getPointOfInterestName(i);
+        if ((interestType == "theatre")||(interestType == "cinema")||(interestType == "casino")){
+            entertainment.push_back(insertInterest);
+        }else if((interestType == "bus_station")||(interestType == "ferry_terminal")){
+            transportation.push_back(insertInterest);
+        }else if((interestType == "hospital")||(interestType == "pharmacy")||(interestType == "dentist")||(interestType == "doctors")||(interestType == "clinic")){
+            medical.push_back(insertInterest);
+        }else if((interestType == "fast_food")||(interestType == "restaurant")||(interestType == "food_court")||(interestType == "backery")){
+            restaurant.push_back(insertInterest);
+        }else if((interestType == "hotel")||(interestType == "motel")){
+            hotel.push_back(insertInterest);
+        }else if(interestType == "bank"){
+            bank.push_back(insertInterest);
+        }else{
+            other.push_back(insertInterest);
+        }
     }
+    
+    //build kd-tree by prepared data
+    kd_Build(kdtree_intersections);
+    kd_Build(kdtree_interests);
     
     // load features information 
     for(unsigned i = 0; i < totalfeatureNum; i++){
@@ -540,55 +566,11 @@ double map_data::get_streetlength_streetID(unsigned inputstreetID) const{
 }
 
 unsigned map_data::closest_interest_point(LatLon my_position) const{ 
-    point currentPosition = point(my_position.lon(), my_position.lat());
-    vector<value> nearestFive;//the vector of list of 5 nearest points, their LatLons and their IDs
-    rtForPOI.query(bgi::nearest(currentPosition,5), std::back_inserter(nearestFive));
-    
-    double distance =0.0;
-    unsigned interest_ID=0;
-    bool time =true;
-    //check the nearest 5 points by hands, one by one
-    for(unsigned i = 0; i < nearestFive.size(); i++){
-        LatLon current = getPointOfInterestPosition(nearestFive[i].second);
-        double currentDiff = find_distance_between_two_points(my_position,current);
-        if(time){
-            distance = currentDiff;
-            interest_ID= nearestFive[i].second;
-            time=false;
-        }
-        if(distance>currentDiff){
-            distance=currentDiff;
-            interest_ID = nearestFive[i].second;
-        }
-    } 
-    return interest_ID;
+    return kd_Search(kdtree_interests,my_position.lon(),my_position.lat());
 }
 
 unsigned map_data::closest_intersection_point(LatLon my_position) const{
-    point currentPosition = point(my_position.lon(), my_position.lat());
-    vector<value> nearestFive;
-    //initially want to only check the nearest 5 points, but there is a corner case, so 
-    //change it to the nearest 35 points. problem solved, but the name of the vector remains as the "nearestFive"
-    rt.query(bgi::nearest(currentPosition,35), std::back_inserter(nearestFive));
-    
-    double distance =0.0;
-    unsigned intersection_ID = 0;
-    bool time = true;
-    //check the nearest 5 points by hands, one by one
-    for(unsigned i = 0; i < nearestFive.size(); i++){
-        LatLon current = getIntersectionPosition(nearestFive[i].second);
-        double currentDiff = find_distance_between_two_points(my_position,current);
-        if(time){
-            distance = currentDiff;
-            intersection_ID = nearestFive[i].second;
-            time = false;
-        }
-        if(currentDiff < distance){
-            distance = currentDiff;
-            intersection_ID = nearestFive[i].second;
-        }
-    }
-    return intersection_ID;
+    return kd_Search(kdtree_intersections,my_position.lon(),my_position.lat());
 }
 
 //return intersections longitude by intersectionsID
@@ -715,4 +697,39 @@ std::vector<feature_data> map_data::get_service_data()const{
 // get otherhighway_data vector
 std::vector<feature_data> map_data::get_otherhighway_data()const{
     return otherhighway;
+}
+
+// get entertainment_data vector
+std::vector<interest_data> map_data::get_entertainment_data()const{
+    return entertainment;
+}
+
+//get transportation_data vector
+std::vector<interest_data> map_data::get_transportation_data()const{
+    return transportation;
+}
+
+//get education_data vector
+std::vector<interest_data> map_data::get_education_data()const{
+    return education;
+}
+
+//get medical_data vector
+std::vector<interest_data> map_data::get_medical_data()const{
+    return medical;
+}
+
+//get restaurant_data vector
+std::vector<interest_data> map_data::get_restaurant_data()const{
+    return restaurant;
+}
+
+//get hotel_data vector
+std::vector<interest_data> map_data::get_hotel_data()const{
+    return hotel;
+}
+
+//get other_data vector
+std::vector<interest_data> map_data::get_other_data()const{
+    return other;
 }

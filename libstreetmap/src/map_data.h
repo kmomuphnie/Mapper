@@ -31,18 +31,7 @@
 #include "OSMNode.h"
 #include "OSMWay.h"
 #include "OSMRelation.h"
-
-//------------------------RTREE LIBRARY HEADERS-------------------------//
-#include <boost/geometry.hpp>
-#include <boost/geometry/geometries/point.hpp>
-#include <boost/geometry/geometries/box.hpp>
-#include <boost/geometry/index/rtree.hpp>
-#include <boost/foreach.hpp>
-namespace bg = boost::geometry;
-namespace bgi = boost::geometry::index;
-typedef bg::model::point<float, 2, bg::cs::cartesian> point;
-typedef std::pair<point, unsigned> value;
-//------------------------RTREE LIBRARY HEADERS-------------------------//
+#include "Ternalkdtreehelper.h"
 //----------------------------STRUCT HEADERS-----------------------------//
 struct intersection_data {
     LatLon position;
@@ -56,6 +45,12 @@ struct feature_data {
     bool openfeature;
     std::string name;
 };
+
+struct interest_data {
+    unsigned interestID;
+    std::string name;
+};
+
 //----------------------------STRUCT HEADERS-----------------------------//
 
 using namespace std;
@@ -70,10 +65,10 @@ class map_data{
         double min_lon = max_lon;
         double avg_lat;
         
-        //r-tree intersection
-        bgi::rtree< value, bgi::rstar<8> > rt;
-        //r-tree interest
-        bgi::rtree< value, bgi::rstar<8> > rtForPOI;
+        //kd-tree intersection
+        std::vector<Point> kdtree_intersections;
+        //kd-tree interest
+        std::vector<Point> kdtree_interests;
         
         //store all street names and their IDs
         std::unordered_map<std::string,std::vector<unsigned> > streetString_streetIDs;
@@ -148,6 +143,14 @@ class map_data{
         //store the highway otherhighway
         std::vector<feature_data> otherhighway;
         
+        std::vector<interest_data> entertainment;
+        std::vector<interest_data> transportation;
+        std::vector<interest_data> education;
+        std::vector<interest_data> medical;
+        std::vector<interest_data> restaurant;
+        std::vector<interest_data> hotel;
+        std::vector<interest_data> bank;
+        std::vector<interest_data> other;
     //public functions   
     public:
         
@@ -243,5 +246,26 @@ class map_data{
         std::vector<feature_data> get_service_data()const;
         // get otherhighway data vector
         std::vector<feature_data> get_otherhighway_data()const;
+        
+        // get entertainment data vector
+        std::vector<interest_data> get_entertainment_data()const;
+        
+        // get transportation data vector
+        std::vector<interest_data> get_transportation_data()const;
+        
+        //get education data vector
+        std::vector<interest_data> get_education_data()const;
+        
+        //get medical data vector
+        std::vector<interest_data> get_medical_data()const;
+        
+        //get restaurant data vector
+        std::vector<interest_data> get_restaurant_data()const;
+        
+        //get hotel data vector
+        std::vector<interest_data> get_hotel_data()const;
+        
+        //get other data vector
+        std::vector<interest_data> get_other_data()const;
 };
 #endif /* MAP_DATA_H */
