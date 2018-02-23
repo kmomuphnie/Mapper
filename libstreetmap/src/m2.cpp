@@ -57,6 +57,9 @@ void draw_find_box();
 void find_intersection_from_input();
 void draw_found_intersection();
 
+string globalName1;
+string globalName2;
+
 
 void act_on_key_press(char key_pressed, int keysym) {
     // function to handle keyboard press event, the ASCII character is returned
@@ -105,6 +108,8 @@ void act_on_key_press(char key_pressed, int keysym) {
             find_string += key_pressed;
             break;
     }
+    
+    globalName1.push_back(key_pressed);
     draw_screen();
 #endif   
 }
@@ -240,6 +245,23 @@ void find_by_street_names(void (*drawscreen_ptr) (void)){
  return;  
 }
 
+void start_search(void (*drawscreen_ptr) (void)){
+    bool turn_on = true;
+    bool turn_off = false;
+    set_keypress_input(turn_on);
+    //clear the string
+    globalName1.clear();
+    
+    
+    
+    
+    
+    return;
+}
+
+
+
+
 void draw_map(){
     // it would gives title to our map in the map windows
     init_graphics("Some Map",t_color(243,242,242,255));
@@ -249,14 +271,15 @@ void draw_map(){
     
     set_drawing_buffer(OFF_SCREEN);
     
-    create_button("Window", "Search", NULL);
+    create_button("Window", "Search", start_search);
     create_button("Search", "Find", find_by_street_names);
     create_button("Find", "Subway", NULL);
     // enable keyboard input
-    set_keypress_input(true);
+    set_keypress_input(false);
     // this is a loop that would continue check mouse and keyboard then draw something onto the map windows
     event_loop(act_on_button_press,nullptr,act_on_key_press,draw_screen);
     
+
     // close the map window
     close_graphics();
 }
@@ -749,6 +772,13 @@ void draw_screen() {
         drawtext_in(createFind,found_information);
      }
 
+    
+    
+    
+    
+    
+    
+    
         //draw search bar
     {
         set_coordinate_system(GL_SCREEN);
@@ -760,7 +790,10 @@ void draw_screen() {
         //drawtext (55, 33, "Screen coord");
         //drawtext (200, 80, "Search");
         draw_surface(load_png_from_file("/homes/c/cuidongf/ece297/work/mapper/libstreetmap/resources/micon.png"), 10, 10);    
+        drawtext(150,40, globalName1);
+        
         set_coordinate_system(GL_WORLD);
+        
     }
     
 
