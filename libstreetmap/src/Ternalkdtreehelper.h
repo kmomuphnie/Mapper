@@ -43,6 +43,6 @@ void Build(vector<Point> &p, int l,int r,int depth);
 double kd_Dis(Point point1,Point point2 );
 Ans  kd_Find(vector<Point> const&p,Point tar,int l,int r,int depth);
 void kd_Build(vector<Point> &p );
-double kd_Search(vector<Point> const&p,   double x,   double y );
+unsigned kd_Search(vector<Point> const&p,   double x,   double y );
 #endif /* TERNALKDTREEHELPER_H */
 

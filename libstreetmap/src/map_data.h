@@ -32,6 +32,7 @@
 #include "OSMWay.h"
 #include "OSMRelation.h"
 #include "Ternalkdtreehelper.h"
+
 //----------------------------STRUCT HEADERS-----------------------------//
 struct intersection_data {
     LatLon position;
@@ -39,17 +40,34 @@ struct intersection_data {
     double latitude_cartesian;
     std::string name;
 };
+
+struct draw_street_segments_data {
+    unsigned segmentsID;
+    t_bound_box location;
+    std::string name;
+    double angle;
+    bool draw;
+};
+
 struct feature_data {
     unsigned npoints;
     t_point* point;
     bool openfeature;
+    bool oneway;
     std::string name;
+    draw_street_segments_data drawInfo;
 };
 
 struct interest_data {
     unsigned interestID;
     std::string name;
 };
+
+//struct draw_street_names_data {
+//    unsigned streetID;
+//    string type;
+//    
+//};
 
 //----------------------------STRUCT HEADERS-----------------------------//
 
@@ -123,34 +141,71 @@ class map_data{
         //store different importance ways
         //store all OSMwayID types
         std::unordered_map<OSMID,std::string> OSMID_typestring;
+        std::vector<bool> intersectionID_alreadyinsert;
         //std::unordered_map<OSMID,std::string> OSMID_OSMwayname;
         //store the highway motorway
         std::vector<feature_data> motorway;
+        std::vector<intersection_data> motorway_intersection;
         //store the highway trunk
         std::vector<feature_data> trunk;
+        std::vector<intersection_data> trunk_intersection;
         //store the highway primary
         std::vector<feature_data> primary;
+        std::vector<intersection_data> primary_intersection;
         //store the highway secondary
         std::vector<feature_data> secondary;
+        std::vector<intersection_data> secondary_intersection;
         //store the highway tertiary
         std::vector<feature_data> tertiary;
+        std::vector<intersection_data> tertiary_intersection;
         //store the highway unclassified
         std::vector<feature_data> unclassified;
+        std::vector<intersection_data> unclassified_intersection;
         //store the highway residential
         std::vector<feature_data> residential;
+        std::vector<intersection_data> residential_intersection;
         //store the highway service
         std::vector<feature_data> service;
+        std::vector<intersection_data> service_intersection;
         //store the highway otherhighway
         std::vector<feature_data> otherhighway;
+        std::vector<intersection_data> otherhighway_intersection;
+        //store the highway otherhighway
+        std::vector<feature_data> otherway;
+        std::vector<intersection_data> otherway_intersection;
         
+        
+        //store the entertainment type of POIs
         std::vector<interest_data> entertainment;
+        
+        //store the transportation type of POIs
         std::vector<interest_data> transportation;
+        
+        //store the education type of POIs
         std::vector<interest_data> education;
+        
+        //store the medical type of POIs
         std::vector<interest_data> medical;
+        
+        //store the restaurant type of POIs
         std::vector<interest_data> restaurant;
+        
+        //store the hotel type of POIs
         std::vector<interest_data> hotel;
+        
+        //store the bank type of POIs
         std::vector<interest_data> bank;
+        
+        //store the other type of POIs
         std::vector<interest_data> other;
+        
+        //store street segment's information for drawing segment's names
+        std::vector<draw_street_segments_data> segmentDrawingInfo;
+        
+        //OSMID and index map
+        std::unordered_map<OSMID,unsigned> node_OSMID_ID;
+        std::unordered_map<OSMID,unsigned> way_OSMID_ID;
+        std::vector< std::vector< std::vector<t_point> > > subwaypointscartision;
     //public functions   
     public:
         
@@ -246,6 +301,32 @@ class map_data{
         std::vector<feature_data> get_service_data()const;
         // get otherhighway data vector
         std::vector<feature_data> get_otherhighway_data()const;
+        // get otherway data vector
+        std::vector<feature_data> get_otherway_data()const;
+        
+        // get motorway data vector
+        std::vector<intersection_data> get_motorway_intersection_data()const;
+        // get trunk data vector
+        std::vector<intersection_data> get_trunk_intersection_data()const;
+        // get primary data vector
+        std::vector<intersection_data> get_primary_intersection_data()const;
+        // get secondary data vector
+        std::vector<intersection_data> get_secondary_intersection_data()const;
+        // get tertiary data vector
+        std::vector<intersection_data> get_tertiary_intersection_data()const;
+        // get unclassified data vector
+        std::vector<intersection_data> get_unclassified_intersection_data()const;
+        // get residential data vector
+        std::vector<intersection_data> get_residential_intersection_data()const;
+        // get service data vector
+        std::vector<intersection_data> get_service_intersection_data()const;
+        // get otherhighway data vector
+        std::vector<intersection_data> get_otherhighway_intersection_data()const;
+        
+        // get subway data
+        std::vector< std::vector< std::vector<t_point> > > get_subway_data()const;
+
+        
         
         // get entertainment data vector
         std::vector<interest_data> get_entertainment_data()const;
@@ -267,5 +348,8 @@ class map_data{
         
         //get other data vector
         std::vector<interest_data> get_other_data()const;
+        
+        //get segmentDrawingInfo data vector
+        std::vector<draw_street_segments_data> get_segmentDrawingInfo_data()const;
 };
 #endif /* MAP_DATA_H */

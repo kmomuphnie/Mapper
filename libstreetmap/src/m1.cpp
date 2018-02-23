@@ -18,6 +18,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
+//including libraries which are used in this program
 #include "m1.h"
 #include "StreetsDatabaseAPI.h"
 #include "OSMDatabaseAPI.h"
@@ -33,7 +35,7 @@
 #include "OSMWay.h"
 #include "OSMRelation.h"
 using namespace std;
-        
+
 map_data const* my_map;
 
 bool load_map(std::string map_path) {

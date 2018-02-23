@@ -106,6 +106,8 @@ map_data::map_data() {
     unsigned totalfeatureNum = getNumberOfFeatures();
     unsigned totalwayNum = getNumberOfWays();
     unsigned totalinterestNum = getNumberOfPointsOfInterest();
+    unsigned totalNodeNum = getNumberOfNodes();
+    unsigned totalRelationshipNum = getNumberOfRelations();
     //change the size of storing variables
     intersection_street_segments.resize(totalIntersectionsNum);
     street_segments.resize(totalstreetNum);
@@ -114,10 +116,20 @@ map_data::map_data() {
     segmentID_traveltime.resize(totalsegmentNum);
     streetID_streetlength.resize(totalstreetNum);
     intersections.resize(totalIntersectionsNum);
+    intersectionID_alreadyinsert.resize(totalIntersectionsNum);
     kdtree_intersections.resize(totalIntersectionsNum);
     kdtree_interests.resize(totalinterestNum);
+    
+    //store the nodeOSMID type to unordered map
+    for (unsigned i = 0;i<totalNodeNum;i++) {
+        node_OSMID_ID[getNodeByIndex(i)->id()] = i;
+    }
+    
+    
     //store the wayOSMID type to unordered map
     for (unsigned i = 0;i<totalwayNum;i++) {
+        //store the wayOSMID type to unordered map
+        way_OSMID_ID[getWayByIndex(i)->id()] = i;
         for(unsigned j=0;j<getTagCount(getWayByIndex(i));j++){
             //cout<<getTagPair(getWayByIndex(i),j).first<<" "<<getTagPair(getWayByIndex(i),j).second<<endl;
             if(getTagPair(getWayByIndex(i),j).first=="highway"){
@@ -128,8 +140,7 @@ map_data::map_data() {
 //            }
         }
     }
-    
-    
+
     //store data into vector: intersection_street_segments
     for(unsigned intersection = 0; intersection < totalIntersectionsNum;++intersection){
         //loop through all the intersections
@@ -153,6 +164,9 @@ map_data::map_data() {
         kdtree_intersections[intersection].x[0]=intersections[intersection].position.lon();
         kdtree_intersections[intersection].x[1]=intersections[intersection].position.lat();
         kdtree_intersections[intersection].id=intersection;  
+        
+        // set already insert intersection to false in vector
+        intersectionID_alreadyinsert[intersection] = false;
     }
     
     //calculate latitude-average after the intersection loop
@@ -184,8 +198,30 @@ map_data::map_data() {
         
         // set data structure for save drawing information
         feature_data tempfeature_data;
-        tempfeature_data.npoints=temp.curvePointCount+2;
-        tempfeature_data.point=new t_point[tempfeature_data.npoints];
+        tempfeature_data.npoints = temp.curvePointCount+2;
+        tempfeature_data.point = new t_point[tempfeature_data.npoints];
+        
+        //load data into segmentDrawingInfo vector
+        float segmentFromX = point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+        float segmentFromY = point1.lat()*DEG_TO_RAD;
+        float segmentToX = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+        float segmentToY = point2.lat()*DEG_TO_RAD;
+        t_point start (segmentFromX, segmentFromY);
+        t_point end (segmentToX, segmentToY);
+        draw_street_segments_data insertSegmentDrawingtemp;
+        insertSegmentDrawingtemp.location = t_bound_box(start, end);
+        insertSegmentDrawingtemp.segmentsID = segmentID;
+        insertSegmentDrawingtemp.name = getStreetName(temp.streetID);
+        
+        if (insertSegmentDrawingtemp.name=="<unknown>")
+            insertSegmentDrawingtemp.draw = false;
+        else
+            insertSegmentDrawingtemp.draw = true;
+        
+        double RAD_TO_DEG = 1/DEG_TO_RAD;
+        insertSegmentDrawingtemp.angle = atan((segmentFromY - segmentToY)/(segmentFromX - segmentToX))*RAD_TO_DEG;
+        tempfeature_data.drawInfo = insertSegmentDrawingtemp;
+        tempfeature_data.oneway = temp.oneWay;
         
         //calculate length of one street segment
         if(temp.curvePointCount==0){
@@ -239,31 +275,216 @@ map_data::map_data() {
         std::unordered_map<OSMID,std::string>::const_iterator got = OSMID_typestring.find (temp.wayOSMID);
         // push data structure to the OSMwayID types
         if (got == OSMID_typestring.end()) {
-            otherhighway.push_back(tempfeature_data);
-        } else {
+            otherway.push_back(tempfeature_data);
+            if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    otherway_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    otherway_intersection.push_back(tempintersection_data);
+                }
+        } 
+        else {
+            //find tag is motorway insert segment data and intersection data for level
             if (got->second=="motorway") {
                 motorway.push_back(tempfeature_data);
+                if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    motorway_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    motorway_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="trunk") {
                 trunk.push_back(tempfeature_data);
+                if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    trunk_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    trunk_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="primary") {
                 primary.push_back(tempfeature_data);
+                if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    primary_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    primary_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="secondary") {
                 secondary.push_back(tempfeature_data);
+                if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    secondary_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    secondary_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="tertiary") {
                 tertiary.push_back(tempfeature_data);
+                if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    tertiary_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    tertiary_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="unclassified") {
                 unclassified.push_back(tempfeature_data);
+                if(!intersectionID_alreadyinsert[temp.from]){
+                    intersectionID_alreadyinsert[temp.from]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian= point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    unclassified_intersection.push_back(tempintersection_data);
+                }
+                if(!intersectionID_alreadyinsert[temp.to]){
+                    intersectionID_alreadyinsert[temp.to]=true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat()*DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    unclassified_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="residential") {
                 residential.push_back(tempfeature_data);
+                if (!intersectionID_alreadyinsert[temp.from]) {
+                    intersectionID_alreadyinsert[temp.from] = true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian = point1.lon() * cos(avg_lat) * DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat() * DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    residential_intersection.push_back(tempintersection_data);
+                }
+                if (!intersectionID_alreadyinsert[temp.to]) {
+                    intersectionID_alreadyinsert[temp.to] = true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon() * cos(avg_lat) * DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat() * DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    residential_intersection.push_back(tempintersection_data);
+                }
             } 
             else if (got->second=="service") {
                 service.push_back(tempfeature_data);
+                if (!intersectionID_alreadyinsert[temp.from]) {
+                    intersectionID_alreadyinsert[temp.from] = true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian = point1.lon() * cos(avg_lat) * DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat() * DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    service_intersection.push_back(tempintersection_data);
+                }
+                if (!intersectionID_alreadyinsert[temp.to]) {
+                    intersectionID_alreadyinsert[temp.to] = true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon() * cos(avg_lat) * DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat() * DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    service_intersection.push_back(tempintersection_data);
+                }
+            } 
+            else {
+                otherhighway.push_back(tempfeature_data);
+                if (!intersectionID_alreadyinsert[temp.from]) {
+                    intersectionID_alreadyinsert[temp.from] = true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point1;
+                    tempintersection_data.longitude_cartesian = point1.lon() * cos(avg_lat) * DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point1.lat() * DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.from);
+                    otherhighway_intersection.push_back(tempintersection_data);
+                }
+                if (!intersectionID_alreadyinsert[temp.to]) {
+                    intersectionID_alreadyinsert[temp.to] = true;
+                    intersection_data tempintersection_data;
+                    tempintersection_data.position = point2;
+                    tempintersection_data.longitude_cartesian = point2.lon() * cos(avg_lat) * DEG_TO_RAD;
+                    tempintersection_data.latitude_cartesian = point2.lat() * DEG_TO_RAD;
+                    tempintersection_data.name = getIntersectionName(temp.to);
+                    otherhighway_intersection.push_back(tempintersection_data);
+                }
             }
         }
 //        if(OSMID_OSMwayname[temp.wayOSMID]!=getStreetName(temp.streetID)&&(getStreetName(temp.streetID)!="<unknown>")){
@@ -271,7 +492,20 @@ map_data::map_data() {
 //            cout<<getStreetName(temp.streetID)<<endl;
 //            cout<<""<<endl;
 //        }
-        
+//        //load data into segmentDrawingInfo vector
+//        float segmentFromX = point1.lon()*cos(avg_lat)*DEG_TO_RAD;
+//        float segmentFromY = point1.lat()*DEG_TO_RAD;
+//        float segmentToX = point2.lon()*cos(avg_lat)*DEG_TO_RAD;
+//        float segmentToY = point2.lat()*DEG_TO_RAD;
+//        t_point start (segmentFromX, segmentFromY);
+//        t_point end (segmentToX, segmentToY);
+//        draw_street_segments_data insertSegmentDrawingtemp;
+//        insertSegmentDrawingtemp.location = t_bound_box(start, end);
+//        insertSegmentDrawingtemp.segmentsID = segmentID;
+//        insertSegmentDrawingtemp.name = getStreetName(temp.streetID);
+//        float RAD_TO_DEG = 1/DEG_TO_RAD;
+//        insertSegmentDrawingtemp.angle = atan((segmentFromY - segmentToY)/(segmentFromX - segmentToX))/RAD_TO_DEG;
+//        segmentDrawingInfo.push_back(insertSegmentDrawingtemp);
     }
     
     
@@ -531,6 +765,44 @@ map_data::map_data() {
 //    cout<<residential.size()<<endl;
 //    cout<<service.size()<<endl;
 //    cout<<otherhighway.size()<<endl;
+//    for(unsigned i =0;i<totalIntersectionsNum;i++){
+//        if(intersectionID_alreadyinsert[i]==false){
+//            intersection_data tempintersection_data;
+//            tempintersection_data.position = getIntersectionPosition(i);
+//            tempintersection_data.latitude_cartesian = getIntersectionPosition(i).lat()* DEG_TO_RAD;
+//            tempintersection_data.longitude_cartesian = getIntersectionPosition(i).lon() * cos(avg_lat) * DEG_TO_RAD;
+//            tempintersection_data.name = getIntersectionName(i);
+//            noway_intersection.push_back(tempintersection_data);
+//        }
+//    }
+    //store subway information
+    for (unsigned i = 0; i < totalRelationshipNum; i++) {
+        const OSMRelation* temprelation = getRelationByIndex(i);
+        for (unsigned j = 0; j < getTagCount(temprelation); j++) {
+            if (getTagPair(temprelation, j).second == "subway") {
+                std::vector<OSMRelation::Member> tempsubwaymember = temprelation->members();
+                unsigned subwayidx = subwaypointscartision.size();
+                subwaypointscartision.resize(subwaypointscartision.size() + 1);
+                for (unsigned k = 0; k < tempsubwaymember.size(); k++) {
+                    if (tempsubwaymember[k].tid.type() == 2) {
+                        unsigned wayIDfromOSMID = way_OSMID_ID[tempsubwaymember[k].tid];
+                        unsigned wayidx = subwaypointscartision[subwayidx].size();
+                        subwaypointscartision[subwayidx].resize(subwaypointscartision[subwayidx].size() + 1);
+                        const std::vector<OSMID> relation_way_nodeOSMID = getWayByIndex(wayIDfromOSMID)->ndrefs();
+                        for (unsigned l = 0; l < relation_way_nodeOSMID.size(); l++) {
+                            unsigned nodeIDfromOSMID = node_OSMID_ID[relation_way_nodeOSMID[l]];
+                            LatLon tempnodelatlon = getNodeByIndex(nodeIDfromOSMID)->coords();
+                            t_point tempt_point;
+                            tempt_point.x = tempnodelatlon.lon() * cos(avg_lat) * DEG_TO_RAD;
+                            tempt_point.y = tempnodelatlon.lat() * DEG_TO_RAD;
+                            subwaypointscartision[subwayidx][wayidx].push_back(tempt_point);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
 }
     
 
@@ -550,7 +822,15 @@ std::vector<unsigned>map_data::get_all_intersections_streetID (unsigned inputstr
 
 std::vector<unsigned>map_data::get_all_streetID_streetString (std::string inputstreetString) const{
     //later would be used//return streetnameID_streetID[streetnameID.at(inputstreetString)];
-    return streetString_streetIDs.at(inputstreetString);
+    if (streetString_streetIDs.find(inputstreetString)!=streetString_streetIDs.end()) {
+      return streetString_streetIDs.at(inputstreetString);  
+    }
+    else {
+        std::vector<unsigned> empty;
+        empty.resize(0);
+        return empty;
+    }
+    
 }
 
 double map_data::get_segmentlength_segmentID(unsigned inputsegmentID) const{
@@ -698,6 +978,53 @@ std::vector<feature_data> map_data::get_service_data()const{
 std::vector<feature_data> map_data::get_otherhighway_data()const{
     return otherhighway;
 }
+// get otherway_data vector
+std::vector<feature_data> map_data::get_otherway_data()const{
+    return otherway;
+}
+
+// get subway data
+std::vector< std::vector< std::vector<t_point> > > map_data::get_subway_data()const{
+    return subwaypointscartision;
+}
+
+
+// get motorway_data vector
+std::vector<intersection_data> map_data::get_motorway_intersection_data()const{
+    return motorway_intersection;
+}
+// get trunk_data vector
+std::vector<intersection_data> map_data::get_trunk_intersection_data()const{
+    return trunk_intersection;
+}
+// get primary_data vector
+std::vector<intersection_data> map_data::get_primary_intersection_data()const{
+    return primary_intersection;
+}
+// get secondary_data vector
+std::vector<intersection_data> map_data::get_secondary_intersection_data()const{
+    return secondary_intersection;
+}
+// get tertiary_data vector
+std::vector<intersection_data> map_data::get_tertiary_intersection_data()const{
+    return tertiary_intersection;
+}
+// get unclassified_data vector
+std::vector<intersection_data> map_data::get_unclassified_intersection_data()const{
+    return unclassified_intersection;
+}
+// get residential_data vector
+std::vector<intersection_data> map_data::get_residential_intersection_data()const{
+    return residential_intersection;
+}
+// get service_data vector
+std::vector<intersection_data> map_data::get_service_intersection_data()const{
+    return service_intersection;
+}
+// get otherhighway_data vector
+std::vector<intersection_data> map_data::get_otherhighway_intersection_data()const{
+    return otherhighway_intersection;
+} 
 
 // get entertainment_data vector
 std::vector<interest_data> map_data::get_entertainment_data()const{
@@ -732,4 +1059,9 @@ std::vector<interest_data> map_data::get_hotel_data()const{
 //get other_data vector
 std::vector<interest_data> map_data::get_other_data()const{
     return other;
+}
+
+//get segmentDrawingInfo vector
+std::vector<draw_street_segments_data> map_data::get_segmentDrawingInfo_data()const{
+    return segmentDrawingInfo;
 }

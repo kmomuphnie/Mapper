@@ -80,7 +80,6 @@ void set_visible_world(const t_bound_box& bounds);
 
 /**
  * Returns a rectangle with the bounds of the drawn world -- i.e. what are 
- * Returns a rectangle with the bounds of the drawn world -- i.e. what are 
  * the edges in your chosen (world) coordinate system that match the edges of
  * the window? Useful for figuring out how zoomed in or out you are.
  * Also useful for getting the currently visible rectangle,

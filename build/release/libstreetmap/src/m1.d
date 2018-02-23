@@ -12,7 +12,8 @@ build/release/libstreetmap/src/m1.o: libstreetmap/src/m1.cpp \
  /cad2/ece297s/public/include/streetsdatabase/OSMWay.h \
  /cad2/ece297s/public/include/streetsdatabase/OSMRelation.h \
  libstreetmap/src/map_data.h libstreetmap/src/easygl/graphics_types.h \
- libstreetmap/src/easygl/easygl_constants.h
+ libstreetmap/src/easygl/easygl_constants.h \
+ libstreetmap/src/Ternalkdtreehelper.h
 
 /cad2/ece297s/public/include/milestones/m1.h:
 
@@ -43,3 +44,5 @@ libstreetmap/src/map_data.h:
 libstreetmap/src/easygl/graphics_types.h:
 
 libstreetmap/src/easygl/easygl_constants.h:
+
+libstreetmap/src/Ternalkdtreehelper.h:

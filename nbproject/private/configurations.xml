@@ -36,6 +36,8 @@
             <in>graphics_types.cpp</in>
             <in>graphics_types.h</in>
           </df>
+          <in>Ternalkdtreehelper.cpp</in>
+          <in>Ternalkdtreehelper.h</in>
           <in>m1.cpp</in>
           <in>m2.cpp</in>
           <in>map_data.cpp</in>

@@ -12,6 +12,7 @@
             <in>graphics_state.cpp</in>
             <in>graphics_types.cpp</in>
           </df>
+          <in>Ternalkdtreehelper.cpp</in>
           <in>m1.cpp</in>
           <in>m2.cpp</in>
           <in>map_data.cpp</in>
@@ -92,6 +93,13 @@
           <preBuildCommand></preBuildCommand>
         </preBuild>
       </makefileType>
+      <item path="libstreetmap/src/Ternalkdtreehelper.cpp"
+            ex="false"
+            tool="1"
+            flavor2="11">
+        <ccTool flags="0">
+        </ccTool>
+      </item>
       <item path="libstreetmap/src/easygl/Surface.cpp"
             ex="false"
             tool="1"

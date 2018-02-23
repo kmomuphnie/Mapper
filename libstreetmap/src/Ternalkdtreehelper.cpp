@@ -90,7 +90,7 @@ void kd_Build(vector<Point> &p )
     int N = p.size() ;
     Build(p, 0, N-1, 0 ) ;
 }
-double kd_Search(vector<Point> const&p,   double x,   double y )
+unsigned kd_Search(vector<Point> const&p,   double x,   double y )
 {
     Point tmp ;
     tmp.x[0] = x, tmp.x[1] = y ;tmp.id = -1;
